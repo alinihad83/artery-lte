@@ -210,7 +210,7 @@ class TraCICommandInterface
 		}
 
 		// Vehicletype methods
-		std::list<std::string> getVehicletypeIds();
+		std::list<std::string> getVehicleTypeIds();
 		class Vehicletype {
 			public:
 				Vehicletype(TraCICommandInterface* traci, std::string typeId) : traci(traci), typeId(typeId) {

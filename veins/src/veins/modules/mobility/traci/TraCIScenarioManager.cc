@@ -263,7 +263,7 @@ void TraCIScenarioManager::handleSelfMsg(cMessage *msg) {
 	if (msg == executeOneTimestepTrigger) {
 		if (simTime() > 1) {
 			if (vehicleTypeIds.size()==0) {
-				std::list<std::string> vehTypes = getCommandInterface()->getVehicletypeIds();
+				std::list<std::string> vehTypes = getCommandInterface()->getVehicleTypeIds();
 				for (std::list<std::string>::const_iterator i = vehTypes.begin(); i != vehTypes.end(); ++i) {
 					if (i->compare("DEFAULT_VEHTYPE")!=0) {
 						MYDEBUG << *i << std::endl;
@@ -326,6 +326,7 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
 	mod->finalizeParameters();
 	mod->getDisplayString().parse(displayString.c_str());
 	mod->buildInside();
+	mod->scheduleStart(simTime() + updateInterval);
 
 	// pre-initialize TraCIMobility
 	for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {

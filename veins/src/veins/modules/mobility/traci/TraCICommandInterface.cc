@@ -83,7 +83,7 @@ void TraCICommandInterface::Vehicle::setParking() {
 	ASSERT(buf.eof());
 }
 
-std::list<std::string> TraCICommandInterface::getVehicletypeIds() {
+std::list<std::string> TraCICommandInterface::getVehicleTypeIds() {
 	return genericGetStringList(CMD_GET_VEHICLETYPE_VARIABLE, "", ID_LIST, RESPONSE_GET_VEHICLETYPE_VARIABLE);
 }
 

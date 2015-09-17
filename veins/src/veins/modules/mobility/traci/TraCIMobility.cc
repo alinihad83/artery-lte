@@ -237,6 +237,11 @@ void TraCIMobility::changeParkingState(bool newState) {
 	emit(parkingStateChangedSignal, this);
 }
 
+std::pair<double, double> TraCIMobility::getGeoPosition() const
+{
+	return getManager()->getCommandInterface()->getLonLat(roadPosition);
+}
+
 void TraCIMobility::updateDisplayString() {
 	ASSERT(-M_PI <= angle);
 	ASSERT(angle < M_PI);
