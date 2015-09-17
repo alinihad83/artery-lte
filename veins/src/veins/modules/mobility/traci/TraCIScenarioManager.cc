@@ -134,15 +134,13 @@ void TraCIScenarioManager::initialize(int stage) {
 	executeOneTimestepTrigger = new cMessage("step");
 	scheduleAt(firstStepAt, executeOneTimestepTrigger);
 
-	cModule *binderTmp = getParentModule()->getModuleByPath("scenario.binder");
-	binder = dynamic_cast<LteBinder*>(binderTmp);
-	if (!binder) {
-	   std::cerr << "No IPv4NetworkConfigurator found!" << std::endl;
+	binder = FindModule<LteBinder*>::findGlobalModule();
+	if (binder == NULL) {
+	   error("No IPv4NetworkConfigurator found!");
 	}
-	cModule* configuratorTmp = getModuleByPath("scenario.configurator");
-	configurator = dynamic_cast<IPv4NetworkConfigurator*>(configuratorTmp);
-	if(!configurator){
-	   std::cerr << "No IPv4NetworkConfigurator found!" << std::endl;
+    configurator = FindModule<IPv4NetworkConfigurator*>::findGlobalModule();
+    if(configurator == NULL){
+	   error("No IPv4NetworkConfigurator found!");
 	}
 
 	MYDEBUG << "initialized TraCIScenarioManager" << endl;
