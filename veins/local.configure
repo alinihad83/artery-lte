@@ -1,0 +1,6 @@
+[vanetza]
+root=../../vanetza/
+libdir=$(root)s/build/lib
+
+#[boost]
+#root=/usr/local/...
