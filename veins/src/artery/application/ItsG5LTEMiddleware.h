@@ -16,13 +16,15 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifndef ITSG5MIDDLEWARE_H_
-#define ITSG5MIDDLEWARE_H_
+#ifndef ITSG5LTEMIDDLEWARE_H_
+#define ITSG5LTEMIDDLEWARE_H_
 
 #include "artery/application/Facilities.h"
 #include "artery/application/VehicleDataProvider.h"
+#include "artery/application/ItsG5Middleware.h"
 #include "veins/base/modules/BaseApplLayer.h"
 #include <omnetpp.h>
+#include "UDPControlInfo_m.h"
 #include <vanetza/access/data_request.hpp>
 #include <vanetza/access/interface.hpp>
 #include <vanetza/btp/data_interface.hpp>
@@ -37,61 +39,40 @@
 #include <map>
 #include <memory>
 
+
+#include "UDPSocket.h"
+#include "IPvXAddressResolver.h"
+
 // forward declarations
 namespace Veins { class TraCIMobility; }
 class ItsG5BaseService;
-
-LAddress::L2Type convertToL2Type(const vanetza::MacAddress& mac);
-vanetza::MacAddress convertToMacAddress(const LAddress::L2Type& addr);
 
 /**
  * Middleware providing a runtime context for services.
  * It can be plugged in wherever a IBaseApplLayer implementation is required.
  */
-class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface, public vanetza::btp::RequestInterface
+class ItsG5LTEMiddleware : public ItsG5Middleware
 {
 	public:
-		typedef uint16_t port_type;
 
-		ItsG5Middleware();
+		ItsG5LTEMiddleware();
+		void request(const vanetza::access::DataRequest&, std::unique_ptr<vanetza::geonet::DownPacket>, bool sendWithLte);
 		void request(const vanetza::access::DataRequest&, std::unique_ptr<vanetza::geonet::DownPacket>) override;
-		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>) override;
-		Facilities* getFacilities() { return mFacilities.get(); }
-		port_type getPortNumber(const ItsG5BaseService*) const;
 
 	protected:
 		void initialize(int stage) override;
-		int numInitStages() const override;
 		void finish() override;
 		void handleMessage(cMessage *msg) override;
-		void handleSelfMsg(cMessage *sg) override;
-		void handleLowerMsg(cMessage *msg) override;
-		void handleLowerControl(cMessage *msg) override;
-		void receiveSignal(cComponent*, simsignal_t, cObject*) override;
 
-		void update();
-		void updateGeoRouter();
-		void updateServices();
+	private:
 		void initializeMiddleware();
-		void initializeServices();
-		bool checkServiceFilterRules(const cXMLElement* filters) const;
-		vanetza::geonet::Timestamp deriveTimestamp(simtime_t) const;
 
-		Veins::TraCIMobility* mMobility;
-		VehicleDataProvider mVehicleDataProvider;
-		vanetza::clock::time_point mClock;
-		vanetza::dcc::StateMachine mDccFsm;
-		vanetza::dcc::Scheduler mDccScheduler;
-		vanetza::dcc::AccessControl mDccControl;
-		vanetza::geonet::MIB mGeoMib;
-		vanetza::geonet::Router mGeoRouter;
-		vanetza::btp::PortDispatcher mBtpPortDispatcher;
-		boost::posix_time::ptime mTimebase;
-		unsigned mAdditionalHeaderBits;
-		simtime_t mUpdateInterval;
-		cMessage* mUpdateMessage;
-		std::unique_ptr<Facilities> mFacilities;
-		std::map<ItsG5BaseService*, port_type> mServices;
+
+		Veins::TraCIScenarioManager* manager;
+		UDPSocket socket;
+		int fromLte;
+		int toLte;
+		int ltePort;
 };
 
 #endif

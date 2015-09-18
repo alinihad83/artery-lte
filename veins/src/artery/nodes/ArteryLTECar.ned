@@ -9,6 +9,7 @@ package artery.nodes;
 import org.car2x.veins.base.modules.*;
 import org.car2x.veins.modules.nic.Nic80211p;
 
+import artery.application.*;
 import artery.nic.Nic80211pItsG5;
 
 import org.car2x.veins.modules.lte.*;
@@ -63,10 +64,6 @@ module ArteryLTECar {
             @display("p=375,320;is=s");
         }
 
-        application: SimpleApp {
-            @display("p=196,56;i=block/app2");
-        }
-
         nic80211p: Nic80211pItsG5 {
             parameters:
                 @display("p=157,501");
@@ -77,14 +74,9 @@ module ArteryLTECar {
                 @display("p=375,56;i=block/cogwheel");
         }
 
-        decisionMaker: ExampleDecisionMaker {
+        appl: <applType> like artery.application.IBaseLTEApplLayer {
             parameters:
                 @display("p=196,140;i=block/fork");
-        }
-
-        heterogeneousToLTE: HeterogeneousToLTE {
-            parameters:
-                @display("p=235,263;i=abstract/accesspoint");
         }
 
         networkLayer: NetworkLayerNoConfig {
@@ -107,22 +99,16 @@ module ArteryLTECar {
 
     connections allowunconnected:
 
-        application.toDecisionMaker --> decisionMaker.fromApplication;
-        decisionMaker.toApplication --> application.fromDecisionMaker;
+        nic80211p.upperLayerOut --> appl.lowerLayerIn;
+        nic80211p.upperLayerIn <-- appl.lowerLayerOut;
 
-        nic80211p.upperLayerOut --> decisionMaker.lowerLayerIn;
-        nic80211p.upperLayerIn <-- decisionMaker.lowerLayerOut;
+        nic80211p.upperControlOut --> appl.lowerControlIn;
+        nic80211p.upperControlIn <-- appl.lowerControlOut;
 
-        nic80211p.upperControlOut --> decisionMaker.lowerControlIn;
-        nic80211p.upperControlIn <-- decisionMaker.lowerControlOut;
-
-        heterogeneousToLTE.toApplication --> decisionMaker.fromLte;
-        decisionMaker.toLte --> heterogeneousToLTE.fromApplication;
-
-        heterogeneousToLTE.toLTE --> UDP.appIn++;
+        appl.toLte --> UDP.appIn++;
         UDP.ipOut --> networkLayer.transportIn++;
 
-        heterogeneousToLTE.fromLTE <-- UDP.appOut++;
+        appl.fromLte <-- UDP.appOut++;
         UDP.ipIn <-- networkLayer.transportOut++;
 
         networkLayer.ifOut++ --> nic.upperLayerIn;
