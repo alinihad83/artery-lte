@@ -42,16 +42,13 @@ Define_Module(ItsG5LTEMiddleware);
 
 const simsignalwrap_t cMobilityStateChangedSignal(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
 
-
-ItsG5LTEMiddleware::ItsG5LTEMiddleware()
-{
+ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 }
 
 void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
-		std::unique_ptr<vanetza::geonet::DownPacket> payload)
-{
-	Enter_Method_Silent();
-	request(req, std::move(payload), false);
+        std::unique_ptr<vanetza::geonet::DownPacket> payload) {
+    Enter_Method_Silent();
+    request(req, std::move(payload), false);
 }
 
 void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
@@ -73,39 +70,36 @@ void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
     net->addBitLength(mAdditionalHeaderBits);
     if (sendWithLte) {
         // implement connection to LTE-module
-        IPv4Address address = IPvXAddressResolver().resolve("Backend").get4();
-                    if (address.isUnspecified()) {
-                        address = manager->getIPAddressForID("Backend");
-                    }
-                    if(address.isUnspecified()){
-                        opp_error("Address Backend still unspecified!");
-                        delete macCtrlInfo;
-                        delete net;
-                        return;
-                    }
-                    socket.sendTo(net, address, ltePort);
-    } else
+        IPv4Address address = IPvXAddressResolver().resolve("server").get4();
+        if (address.isUnspecified()) {
+            address = manager->getIPAddressForID("server");
+        }
+        if (address.isUnspecified()) {
+            opp_error("Address of server still unspecified!");
+            delete macCtrlInfo;
+            delete net;
+            return;
+        }
+        socket.sendTo(net, address, ltePort);
+    } else {
         // send via ITS G5
-    sendDown(net);
+        sendDown(net);
+    }
 }
 
-
-
-void ItsG5LTEMiddleware::initialize(int stage)
-{
-	ItsG5Middleware::initialize(stage);
-	switch (stage) {
-		case 0:
-	        fromLte = findGate("fromLte");
-	        toLte = findGate("toLte");
-			break;
-		default:
-			break;
-	}
+void ItsG5LTEMiddleware::initialize(int stage) {
+    ItsG5Middleware::initialize(stage);
+    switch (stage) {
+    case 0:
+        fromLte = findGate("fromLte");
+        toLte = findGate("toLte");
+        break;
+    default:
+        break;
+    }
 }
 
-void ItsG5LTEMiddleware::initializeMiddleware()
-{
+void ItsG5LTEMiddleware::initializeMiddleware() {
     ItsG5Middleware::initializeMiddleware();
     manager = Veins::TraCIScenarioManagerAccess().get();
 
@@ -116,27 +110,26 @@ void ItsG5LTEMiddleware::initializeMiddleware()
     socket.bind(ltePort);
 }
 
-void ItsG5LTEMiddleware::finish()
-{
+void ItsG5LTEMiddleware::finish() {
     ItsG5Middleware::finish();
 }
 
-void ItsG5LTEMiddleware::handleMessage(cMessage *msg)
-{
-	// This clock has to be steady, but no time base required
-	mClock = decltype(mClock) { std::chrono::milliseconds(simTime().inUnit(SIMTIME_MS)) };
+void ItsG5LTEMiddleware::handleMessage(cMessage *msg) {
+    // This clock has to be steady, but no time base required
+    mClock = decltype(mClock) { std::chrono::milliseconds(
+            simTime().inUnit(SIMTIME_MS)) };
 
-	// Message arrival for services expects GeoNet-Packets
+    // Message arrival for services expects GeoNet-Packets
 
-	// check if message arrived via LTE
-	int arrivalGate = msg->getArrivalGateId();
-	    if (arrivalGate == fromLte) {
-	        // LTE Message handling
-	        //handleLowerLteMessage(msg);
-	        handleLowerMsg(msg);
-	    } else {
-	        // ITS G5 Message handling
-	        // Don't forget to dispatch message properly
-	        BaseApplLayer::handleMessage(msg);
-	    }
+    // check if message arrived via LTE
+    int arrivalGate = msg->getArrivalGateId();
+    if (arrivalGate == fromLte) {
+        // LTE Message handling
+        //handleLowerLteMessage(msg);
+        handleLowerMsg(msg);
+    } else {
+        // ITS G5 Message handling
+        // Don't forget to dispatch message properly
+        BaseApplLayer::handleMessage(msg);
+    }
 }
