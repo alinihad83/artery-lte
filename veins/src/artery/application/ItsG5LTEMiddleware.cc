@@ -33,7 +33,9 @@
 #include <vanetza/geonet/packet.hpp>
 #include <vanetza/geonet/position_vector.hpp>
 #include <vanetza/net/mac_address.hpp>
+#include <boost/variant/static_visitor.hpp>
 #include <boost/lexical_cast.hpp>
+#include "cpacket_byte_buffer_convertible.h"
 #include <algorithm>
 #include <regex>
 #include <string>
@@ -59,18 +61,37 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
     payload->layer(OsiLayer::Transport) = btp_header;
 
     if (sendWithLte) {
-        // implement connection to LTE-module
-        IPv4Address address = IPvXAddressResolver().resolve("server").get4();
-        if (address.isUnspecified()) {
-            address = manager->getIPAddressForID("server");
+        std::cout << "Sending with LTE" << endl;
+
+        cPacket* result = nullptr;
+        typedef convertible::byte_buffer byte_buffer;
+        typedef convertible::byte_buffer_impl<cPacket*> byte_buffer_impl;
+
+        byte_buffer* ptr = payload->layer(OsiLayer::Application).ptr();
+        byte_buffer_impl* impl = dynamic_cast<byte_buffer_impl*>(ptr);
+        if (impl != nullptr) {
+            result = impl->consume();
         }
-        if (address.isUnspecified()) {
-            opp_error("Address of server still unspecified!");
-            delete macCtrlInfo;
-            delete net;
-            return;
+
+        if (result != nullptr) {
+
+            std::cout << "length: " << result->getByteLength() << std::endl;
+            std::cout << "info: " << result->info() << std::endl;
+
+            // implement connection to LTE-module
+              IPv4Address address = IPvXAddressResolver().resolve("server").get4();
+              if (address.isUnspecified()) {
+                  address = manager->getIPAddressForID("server");
+              }
+              if (address.isUnspecified()) {
+                  opp_error("Address of server still unspecified!");
+                  return;
+              }
+              socket.sendTo(result, address, ltePort);
+        } else {
+            opp_error("Unable to extract cPacket out of DownPacket");
         }
-        socket.sendTo(net, address, ltePort);
+
     } else {
         std::cout << "Sending with DSRC" << endl;
         switch (req.gn.transport_type) {
