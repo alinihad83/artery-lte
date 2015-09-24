@@ -15,7 +15,7 @@
 
 package artery.application;
 
-import org.car2x.veins.base.modules.IBaseLTEApplLayer;
+import artery.application.IBaseLTEApplLayer;
 
 // Middleware for ITS G5 services
 simple ItsG5LTEMiddleware like IBaseLTEApplLayer
