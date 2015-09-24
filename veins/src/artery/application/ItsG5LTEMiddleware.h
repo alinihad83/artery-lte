@@ -61,13 +61,11 @@ class ItsG5LTEMiddleware : public ItsG5Middleware
 
 	protected:
 		void initialize(int stage) override;
+        void initializeMiddleware();
 		void finish() override;
 		void handleMessage(cMessage *msg) override;
 
 	private:
-		void initializeMiddleware();
-
-
 		Veins::TraCIScenarioManager* manager;
 		UDPSocket socket;
 		int fromLte;

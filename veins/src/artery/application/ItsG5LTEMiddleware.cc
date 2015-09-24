@@ -110,8 +110,9 @@ void ItsG5LTEMiddleware::initialize(int stage) {
     ItsG5Middleware::initialize(stage);
     switch (stage) {
     case 0:
-        fromLte = findGate("fromLte");
-        toLte = findGate("toLte");
+//        fromLte = findGate("fromLte");
+//        toLte = findGate("toLte");
+        initializeMiddleware();
         break;
     default:
         break;
@@ -119,7 +120,6 @@ void ItsG5LTEMiddleware::initialize(int stage) {
 }
 
 void ItsG5LTEMiddleware::initializeMiddleware() {
-    ItsG5Middleware::initializeMiddleware();
     manager = Veins::TraCIScenarioManagerAccess().get();
 
     toLte = findGate("toLte");
