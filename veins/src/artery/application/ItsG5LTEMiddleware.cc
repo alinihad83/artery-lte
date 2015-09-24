@@ -45,29 +45,19 @@ const simsignalwrap_t cMobilityStateChangedSignal(MIXIM_SIGNAL_MOBILITY_CHANGE_N
 ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 }
 
-void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
-        std::unique_ptr<vanetza::geonet::DownPacket> payload) {
+void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload) {
     Enter_Method_Silent();
     request(req, std::move(payload), false);
 }
 
-void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
-        std::unique_ptr<vanetza::geonet::DownPacket> payload, bool sendWithLte) {
-    Enter_Method_Silent();
-    GeoNetToMacControlInfo* macCtrlInfo = new GeoNetToMacControlInfo();
-    macCtrlInfo->access_category = edca::map(req.access_category);
-    macCtrlInfo->destination_addr = convertToL2Type(req.destination_addr);
-    macCtrlInfo->source_addr = convertToL2Type(req.source_addr);
+void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload, bool sendWithLte){
+    Enter_Method("request");
+    using namespace vanetza;
+    btp::HeaderB btp_header;
+    btp_header.destination_port = req.destination_port;
+    btp_header.destination_port_info = req.destination_port_info;
+    payload->layer(OsiLayer::Transport) = btp_header;
 
-    if ((*payload)[vanetza::OsiLayer::Network].ptr() == nullptr) {
-        opp_error("Missing network layer payload in middleware request");
-    }
-
-    GeoNetPacket* net = new GeoNetPacket("GeoNet");
-    net->setByteLength(payload->size());
-    net->setPayload(GeoNetPacketWrapper(std::move(payload)));
-    net->setControlInfo(macCtrlInfo);
-    net->addBitLength(mAdditionalHeaderBits);
     if (sendWithLte) {
         // implement connection to LTE-module
         IPv4Address address = IPvXAddressResolver().resolve("server").get4();
@@ -82,8 +72,37 @@ void ItsG5LTEMiddleware::request(const vanetza::access::DataRequest& req,
         }
         socket.sendTo(net, address, ltePort);
     } else {
-        // send via ITS G5
-        sendDown(net);
+        std::cout << "Sending with DSRC" << endl;
+        switch (req.gn.transport_type) {
+            case geonet::TransportType::SHB: {
+                geonet::ShbDataRequest request(mGeoMib);
+                request.upper_protocol = geonet::UpperProtocol::BTP_B;
+                request.communication_profile = req.gn.communication_profile;
+                if (req.gn.maximum_lifetime) {
+                    request.maximum_lifetime = req.gn.maximum_lifetime.get();
+                }
+                request.repetition = req.gn.repetition;
+                request.traffic_class = req.gn.traffic_class;
+                mGeoRouter.request(request, std::move(payload));
+            }
+                break;
+            case geonet::TransportType::GBC: {
+                geonet::GbcDataRequest request(mGeoMib);
+                request.destination = boost::get<geonet::Area>(req.gn.destination);
+                request.upper_protocol = geonet::UpperProtocol::BTP_B;
+                request.communication_profile = req.gn.communication_profile;
+                if (req.gn.maximum_lifetime) {
+                    request.maximum_lifetime = req.gn.maximum_lifetime.get();
+                }
+                request.repetition = req.gn.repetition;
+                request.traffic_class = req.gn.traffic_class;
+                mGeoRouter.request(request, std::move(payload));
+            }
+                break;
+            default:
+                opp_error("Unknown or unimplemented transport type");
+                break;
+        }
     }
 }
 

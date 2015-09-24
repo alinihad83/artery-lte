@@ -56,8 +56,8 @@ class ItsG5LTEMiddleware : public ItsG5Middleware
 	public:
 
 		ItsG5LTEMiddleware();
-		void request(const vanetza::access::DataRequest&, std::unique_ptr<vanetza::geonet::DownPacket>, bool sendWithLte);
-		void request(const vanetza::access::DataRequest&, std::unique_ptr<vanetza::geonet::DownPacket>) override;
+        void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>, bool sendWithLte);
+        void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>) override;
 
 	protected:
 		void initialize(int stage) override;
