@@ -24,14 +24,14 @@
 #include <vanetza/btp/data_interface.hpp>
 #include <vanetza/btp/data_request.hpp>
 #include "Facilities.h"
-#include "ItsG5Middleware.h"
+#include "ItsG5LTEMiddleware.h"
 
 class ItsG5BaseService :
 	public cSimpleModule, public cListener,
 	public vanetza::btp::IndicationInterface
 {
 	public:
-		typedef ItsG5Middleware::port_type port_type;
+		typedef ItsG5LTEMiddleware::port_type port_type;
 
 		ItsG5BaseService();
 		virtual ~ItsG5BaseService();
@@ -41,6 +41,7 @@ class ItsG5BaseService :
 	protected:
 		void initialize() override;
 		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>);
+		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>, bool sendWithLte);
 		void indicate(const vanetza::btp::DataIndication&, std::unique_ptr<vanetza::btp::UpPacket>) override;
 		Facilities& getFacilities();
 		port_type getPortNumber() const;
@@ -50,7 +51,7 @@ class ItsG5BaseService :
 
 	private:
 		Facilities* m_facilities;
-		ItsG5Middleware* m_middleware;
+		ItsG5LTEMiddleware* m_middleware;
 };
 
 #endif /* ITSG5BASESERVICE_H_ */

@@ -74,7 +74,7 @@ void ExampleService::trigger()
 
 	cPacket* packet = new cPacket("Example Service Packet");
 	packet->setByteLength(42);
-	request(req, packet);
+	request(req, packet, true);
 }
 
 void ExampleService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)

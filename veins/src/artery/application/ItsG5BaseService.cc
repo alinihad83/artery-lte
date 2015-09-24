@@ -17,7 +17,7 @@
 //
 
 #include "artery/application/ItsG5Service.h"
-#include "artery/application/ItsG5Middleware.h"
+#include "artery/application/ItsG5LTEMiddleware.h"
 #include "veins/base/utils/FindModule.h"
 #include <cassert>
 
@@ -54,7 +54,7 @@ cModule* ItsG5BaseService::findHost()
 
 void ItsG5BaseService::initialize()
 {
-	ItsG5Middleware* middleware = dynamic_cast<ItsG5Middleware*>(getParentModule());
+	ItsG5LTEMiddleware* middleware = dynamic_cast<ItsG5LTEMiddleware*>(getParentModule());
 	if (middleware == nullptr) {
 		opp_error("Middleware not found");
 	}
@@ -83,6 +83,12 @@ void ItsG5BaseService::request(const vanetza::btp::DataRequestB& req, std::uniqu
 {
 	assert(m_middleware);
 	m_middleware->request(req, std::move(packet));
+}
+
+void ItsG5BaseService::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> packet, bool sendWithLte)
+{
+    assert(m_middleware);
+    m_middleware->request(req, std::move(packet), sendWithLte);
 }
 
 void ItsG5BaseService::indicate(const vanetza::btp::DataIndication& ind, std::unique_ptr<vanetza::btp::UpPacket> packet)
