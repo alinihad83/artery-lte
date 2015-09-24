@@ -76,7 +76,6 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
         if (result != nullptr) {
 
             std::cout << "length: " << result->getByteLength() << std::endl;
-            std::cout << "info: " << result->info() << std::endl;
 
             // implement connection to LTE-module
               IPv4Address address = IPvXAddressResolver().resolve("server").get4();
@@ -130,13 +129,11 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
 void ItsG5LTEMiddleware::initialize(int stage) {
     ItsG5Middleware::initialize(stage);
     switch (stage) {
-    case 0:
-//        fromLte = findGate("fromLte");
-//        toLte = findGate("toLte");
-        initializeMiddleware();
-        break;
-    default:
-        break;
+        case 0:
+            initializeMiddleware();
+            break;
+        default:
+            break;
     }
 }
 
