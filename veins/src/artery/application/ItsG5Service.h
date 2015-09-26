@@ -33,7 +33,7 @@ class ItsG5Service : public ItsG5BaseService
 		void indicate(const vanetza::btp::DataIndication&, std::unique_ptr<vanetza::btp::UpPacket>) override;
 		virtual void indicate(const vanetza::btp::DataIndication&, cPacket*);
 		void request(const vanetza::btp::DataRequestB&, cPacket*);
-		void request(const vanetza::btp::DataRequestB&, cPacket*, bool);
+		void request(const vanetza::btp::DataRequestB&, cPacket*, bool);    // to be used when using LTE
 };
 
 #endif /* ITSG5SERVICE_H_ */

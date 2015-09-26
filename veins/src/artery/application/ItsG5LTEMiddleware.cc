@@ -47,12 +47,33 @@ const simsignalwrap_t cMobilityStateChangedSignal(MIXIM_SIGNAL_MOBILITY_CHANGE_N
 ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 }
 
-void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload) {
-    Enter_Method_Silent();
-    request(req, std::move(payload), false);
+
+void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<cPacket> payload){
+    Enter_Method ("request");
+    std::cout << "Sending with LTE" << endl;
+
+    if (payload != nullptr) {
+
+        std::cout << "length: " << payload->getByteLength() << std::endl;
+
+        // implement connection to LTE-module
+        IPv4Address address = IPvXAddressResolver().resolve("server").get4();
+        if (address.isUnspecified()) {
+            address = manager->getIPAddressForID("server");
+        }
+        if (address.isUnspecified()) {
+            opp_error("Address of server still unspecified!");
+            return;
+        }
+        cPacket *tmp = payload.get();
+        cPacket *packetToSend = new cPacket(*tmp);
+        socket.sendTo(packetToSend, address, ltePort);
+    } else {
+        opp_error("Unable to extract cPacket out of DownPacket");
+    }
 }
 
-void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload, bool sendWithLte){
+void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload){
     Enter_Method("request");
     using namespace vanetza;
     btp::HeaderB btp_header;
@@ -60,38 +81,7 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
     btp_header.destination_port_info = req.destination_port_info;
     payload->layer(OsiLayer::Transport) = btp_header;
 
-    if (sendWithLte) {
-        std::cout << "Sending with LTE" << endl;
 
-        cPacket* result = nullptr;
-        typedef convertible::byte_buffer byte_buffer;
-        typedef convertible::byte_buffer_impl<cPacket*> byte_buffer_impl;
-
-        byte_buffer* ptr = payload->layer(OsiLayer::Application).ptr();
-        byte_buffer_impl* impl = dynamic_cast<byte_buffer_impl*>(ptr);
-        if (impl != nullptr) {
-            result = impl->consume();
-        }
-
-        if (result != nullptr) {
-
-            std::cout << "length: " << result->getByteLength() << std::endl;
-
-            // implement connection to LTE-module
-              IPv4Address address = IPvXAddressResolver().resolve("server").get4();
-              if (address.isUnspecified()) {
-                  address = manager->getIPAddressForID("server");
-              }
-              if (address.isUnspecified()) {
-                  opp_error("Address of server still unspecified!");
-                  return;
-              }
-              socket.sendTo(result, address, ltePort);
-        } else {
-            opp_error("Unable to extract cPacket out of DownPacket");
-        }
-
-    } else {
         std::cout << "Sending with DSRC" << endl;
         switch (req.gn.transport_type) {
             case geonet::TransportType::SHB: {
@@ -122,8 +112,7 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
             default:
                 opp_error("Unknown or unimplemented transport type");
                 break;
-        }
-    }
+     }
 }
 
 void ItsG5LTEMiddleware::initialize(int stage) {
