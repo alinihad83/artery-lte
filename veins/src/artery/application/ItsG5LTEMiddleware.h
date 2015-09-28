@@ -38,6 +38,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <map>
 #include <memory>
+#include <artery/messages/LTEReport_m.h>
 
 
 #include "UDPSocket.h"

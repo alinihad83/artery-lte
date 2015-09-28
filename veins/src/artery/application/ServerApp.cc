@@ -1,5 +1,6 @@
 #include "ServerApp.h"
 #include <string.h>
+#include <artery/messages/LTEReport_m.h>
 
 Define_Module(ServerApp);
 
@@ -18,8 +19,6 @@ void ServerApp::initialize(int stage) {
         receivedMessagesViaDsrc = 0;
         receivedBytes = 0;
 
-        manager = TraCIScenarioManagerAccess().get();
-        ASSERT(manager);
         udpIn = findGate("udpIn");
         udpOut = findGate("udpOut");
 
@@ -28,33 +27,28 @@ void ServerApp::initialize(int stage) {
 }
 
 void ServerApp::finish() {
-    std::cout << "[ServerApp] Received " << receivedMessagesViaLte
-            << " messages via LTE" << std::endl;
-    //std::cout << "[ServerApp] Received " << receivedBytes << " bytes via LTE." << std::endl;
-    std::cout << "[ServerApp] Received " << receivedMessagesViaDsrc
-            << " messages via DSRC." << std::endl;
+    std::cout << "[ServerApp] Received " << receivedMessagesViaLte << " messages via LTE" << std::endl;
+    std::cout << "[ServerApp] Received " << receivedBytes << " bytes via LTE." << std::endl;
+    std::cout << "[ServerApp] Received " << receivedMessagesViaDsrc << " messages via DSRC." << std::endl;
 }
 
 void ServerApp::handleMessageWhenUp(cMessage *msg) {
     if (!msg->isSelfMessage()) {
         int gateId = msg->getArrivalGateId();
         if (gateId == udpIn) {
-            HeterogeneousMessage* heterogeneousMessage =
-                    dynamic_cast<HeterogeneousMessage*>(msg);
 
-            if (heterogeneousMessage != NULL && simTime() > 0) {
-                if (heterogeneousMessage->getNetworkType() == LTE) {
+            cPacket* report = dynamic_cast<cPacket*>(msg);
+
+            if (report != NULL && simTime() > 0) {
+
+                LTEReport* lte = dynamic_cast<LTEReport*>(report);
+
+                if (lte != NULL && simTime() > 0) {
+
                     ++receivedMessagesViaLte;
-                    std::string source =
-                            heterogeneousMessage->getSourceAddress();
-                    //receivedBytes += heterogeneousMessage->getByteLength();
-                    std::cout << "[ServerApp] Received message via LTE."
-                            << std::endl;
-                }
-                if (heterogeneousMessage->getNetworkType() == DSRC) {
-                    ++receivedMessagesViaDsrc;
-                    std::cout << "[ServerApp] Received message via DSRC."
-                            << std::endl;
+                    std::string source = lte->getSrc();
+                    receivedBytes += lte->getByteLength();
+                    std::cout << "[ServerApp] Received LTEReport from " <<  source << std::endl;
                 }
             }
 

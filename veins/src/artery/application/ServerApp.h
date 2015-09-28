@@ -7,7 +7,6 @@
 #include "UDPSocket.h"
 #include "IPv4Address.h"
 #include "veins/modules/heterogeneous/messages/HeterogeneousMessage_m.h"
-#include "veins/modules/mobility/traci/TraCIScenarioManager.h"
 
 /*
  * @brief
@@ -16,13 +15,9 @@
  * @author Julian Timpner
  */
 
-using Veins::TraCIScenarioManager;
-using Veins::TraCIScenarioManagerAccess;
-
 class ServerApp: public ApplicationBase {
 protected:
     UDPSocket socket;
-    TraCIScenarioManager* manager;
     long receivedMessagesViaLte;
     long receivedMessagesViaDsrc;
     long receivedBytes;

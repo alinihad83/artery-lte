@@ -50,11 +50,8 @@ ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 
 void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<cPacket> payload){
     Enter_Method ("request");
-    std::cout << "Sending with LTE" << endl;
 
     if (payload != nullptr) {
-
-        std::cout << "length: " << payload->getByteLength() << std::endl;
 
         // implement connection to LTE-module
         IPv4Address address = IPvXAddressResolver().resolve("server").get4();
@@ -65,8 +62,26 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
             opp_error("Address of server still unspecified!");
             return;
         }
+
         cPacket *tmp = payload.get();
-        cPacket *packetToSend = new cPacket(*tmp);
+        LTEReport *lte = dynamic_cast<LTEReport* >(tmp);
+        //cPacket *tmp = payload.release();
+        //cPacket *packetToSend = new cPacket(*tmp);
+
+        //TODO find dynamic way to send LTEReport instead of manually copying
+        LTEReport *packetToSend = new LTEReport();
+        packetToSend->setDst(lte->getSrc());
+        packetToSend->setSrc(lte->getSrc());
+        packetToSend->setRoadId(lte->getRoadId());
+        packetToSend->setLaneIndex(lte->getLaneIndex());
+        packetToSend->setLanePosition(lte->getLanePosition());
+        packetToSend->setSpeed(lte->getSpeed());
+        packetToSend->setVehicleType(lte->getVehicleType());
+        packetToSend->setVehicleLength(lte->getVehicleLength());
+        packetToSend->setByteLength(lte->getByteLength());
+        packetToSend->setSendingTime(lte->getSendingTime());
+
+        std::cout << "[ITSG5Middleware] Sending LTEReport from " << packetToSend->getSrc() << std::endl;
         socket.sendTo(packetToSend, address, ltePort);
     } else {
         opp_error("Unable to extract cPacket out of DownPacket");
