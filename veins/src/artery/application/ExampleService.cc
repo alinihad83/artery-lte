@@ -96,11 +96,8 @@ void ExampleService::trigger()
 	report->setVehicleLength(vehicleLength);
 	report->setByteLength(42); //TODO set actual byte length
 	report->setSendingTime(time);
-    request(req, report, true);
 
-	//cPacket* packet = new cPacket("Example Service Packet");
-	//packet->setByteLength(42);
-	//request(req, packet, true);
+    request(req, report, true);
 }
 
 void ExampleService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)
