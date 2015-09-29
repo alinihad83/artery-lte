@@ -8,7 +8,7 @@ all:
 makefiles:
 	make -C inet makefiles
 	make -C simulte makefiles
-	cd veins && ./configure --with-inet=../inet --with-simulte=../simulte --with-vanetza
+	cd veins && ./configure --with-inet=../inet --with-simulte=../simulte --with-vanetza --with-mysql
 
 clean:
 	+make -C inet clean
