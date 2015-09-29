@@ -6,7 +6,6 @@
 #include "INETDefs.h"
 #include "UDPSocket.h"
 #include "IPv4Address.h"
-#include "veins/modules/heterogeneous/messages/HeterogeneousMessage_m.h"
 
 /*
  * @brief
