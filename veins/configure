@@ -98,12 +98,6 @@ config.set('boost', 'inc_dir', '%(root)s/include')
 config.set('boost', 'date_time', 'boost_date_time')
 config.set('boost', 'system', 'boost_system')
 config.read('local.configure')
-config.add_section('mysql')
-config.set('mysql', 'inc_dir', '/usr/include/mysql')
-config.add_section('omnetpp')
-config.set('omnetpp', 'inc_dir', '/home/timpner/bin/Artery/omnetpp-4.6/src/envir')
-config.set('omnetpp', 'com_dir', '/home/timpner/bin/Artery/omnetpp-4.6/src/common')
-config.set('omnetpp', 'plat_dir', '/home/timpner/bin/Artery/omnetpp-4.6/include/platdep')
 
 if options.vanetza:
     makemake_flags += ['-I', config.get('boost', 'inc_dir'), '-L', config.get('boost', 'lib_dir')]
@@ -118,6 +112,19 @@ if options.vanetza:
 
 # Add flags for mysql
 if options.mysql:
+    # Add config settings
+    config.add_section('mysql')
+    config.set('mysql', 'inc_dir', '/usr/include/mysql')
+    config.add_section('omnetpp')
+    omnetpp_home = os.environ.get('OMNETPP_HOME', 'None')    
+    # Raise error if OMNETPP_HOME not set
+    if omnetpp_home == 'None':
+        error("OMNETPP_HOME not set!")
+        sys.exit(1)
+    config.set('omnetpp', 'inc_dir', omnetpp_home + '/src/envir')
+    config.set('omnetpp', 'com_dir', omnetpp_home + '/src/common')
+    config.set('omnetpp', 'plat_dir', omnetpp_home + '/include/platdep')
+    # Add includes
     mysql_includes = ['-I', config.get('mysql', 'inc_dir')]
     mysql_link = ['-lmysqlclient']
     omnetpp_includes = ['-I', config.get('omnetpp', 'inc_dir'), '-L', config.get('omnetpp', 'com_dir')]
