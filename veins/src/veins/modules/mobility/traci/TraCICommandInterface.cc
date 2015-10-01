@@ -130,6 +130,10 @@ double TraCICommandInterface::Vehicle::getLanePosition() {
 	return traci->genericGetDouble(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_LANEPOSITION, RESPONSE_GET_VEHICLE_VARIABLE);
 }
 
+double TraCICommandInterface::Vehicle::getSpeed() {
+    return traci->genericGetDouble(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_SPEED, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
 std::list<std::string> TraCICommandInterface::Vehicle::getPlannedRoadIds() {
 	return traci->genericGetStringList(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_EDGES, RESPONSE_GET_VEHICLE_VARIABLE);
 }

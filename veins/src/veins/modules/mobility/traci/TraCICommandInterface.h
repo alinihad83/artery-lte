@@ -57,6 +57,7 @@ class TraCICommandInterface
 				std::string getTypeId();
 				bool changeVehicleRoute(const std::list<std::string>& roads);
 				double getDistance(const Coord& position2, bool returnDrivingDistance);
+                double getSpeed();
 
 			protected:
 				TraCICommandInterface* traci;
