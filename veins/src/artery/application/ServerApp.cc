@@ -75,22 +75,43 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
                 Veins::TraCICommandInterface::Vehicle v = traci->vehicle(vehicleId);
 
                 // Vehicle already processed in an earlier iteration?
-                const bool is_in = insertedVehicles.find(vehicleId) != insertedVehicles.end();
+                const bool is_vehicle_processed = insertedVehicles.find(vehicleId) != insertedVehicles.end();
 
-                if (!is_in) {
+                if (!is_vehicle_processed) {
                     double length = traci->vehicletype(v.getTypeId()).getLength();
                     db->insertVehicle(vehicleId, v.getTypeId(), length);
                     insertedVehicles.insert(vehicleId);
                 }
 
-                //std::string roadId = v.getRoadId();
-                //int32_t laneIndex = v.getLaneIndex();
+                // Process lane / section
 
-                //double lanePosition = v.getLanePosition();
-                //double speed = v.getSpeed();
-                simtime_t simtime = simTime();
-                // inserTraci(it->c_str());
+                std::string roadId = v.getRoadId();
+                int32_t laneIndex = v.getLaneIndex();
+
+                std::pair<std::string, int32_t> section(roadId, laneIndex);
+
+                // Lane already processed in an earlier iteration?
+                const bool is_lane_processed = insertedSections.find(section) != insertedSections.end();
+
+                if (!is_lane_processed) {
+                    // Get the information of the specific lane and store it in the database if not processed before
+                    Veins::TraCICommandInterface::Lane l = traci->lane(roadId + '_' + std::to_string(laneIndex));
+                    double laneLength = l.getLength();
+
+                    db->insertSection(section, laneLength);
+                    insertedSections.insert(section);
+                }
+
+
+                // Store ground truth vehicle information
+
+                double lanePosition = v.getLanePosition();
+                double speed = v.getSpeed();
+                uint64_t simtime = simTime().raw(); // FIXME: Raw int64 of class OPP::SimTime may not be the best/correct way...
+                db->insertTraCI(vehicleId, section, simtime, speed, lanePosition);
             }
+
+
 
             scheduleAt(simTime() + traciLogInterval, new cMessage("self")); //schedule next measurement
     }

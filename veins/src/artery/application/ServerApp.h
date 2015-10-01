@@ -54,6 +54,7 @@ protected:
     sql::Connection *con;
 
     std::set<std::string> insertedVehicles;
+    std::set<std::pair<std::string, int32_t > > insertedSections;
 
 public:
     ServerApp();
