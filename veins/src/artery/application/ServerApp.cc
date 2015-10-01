@@ -16,6 +16,8 @@ void ServerApp::initialize(int stage) {
     if (stage == 0) {
 
         debug = par("debug").boolValue();
+        traciLogInterval = par("traciLogInterval").doubleValue();
+
         receivedMessagesViaLte = 0;
         receivedMessagesViaDsrc = 0;
         receivedBytes = 0;

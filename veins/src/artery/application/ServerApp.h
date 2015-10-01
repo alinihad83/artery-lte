@@ -40,6 +40,7 @@ protected:
     UDPSocket socket;
     long receivedMessagesViaLte;
     long receivedMessagesViaDsrc;
+    double traciLogInterval;
     long receivedBytes;
     bool debug;
     int udpOut;
