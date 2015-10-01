@@ -82,6 +82,13 @@ void TraCICommandInterface::Vehicle::setParking() {
 	TraCIBuffer buf = connection->query(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << value);
 	ASSERT(buf.eof());
 }
+std::list<std::string> TraCICommandInterface::getVehicleIds() {
+    return genericGetStringList(CMD_GET_VEHICLE_VARIABLE, "", ID_LIST, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+int32_t TraCICommandInterface::getVehicleCount(){
+    return genericGetInt(CMD_GET_VEHICLE_VARIABLE, "", ID_COUNT, RESPONSE_GET_VEHICLE_VARIABLE);
+}
 
 std::list<std::string> TraCICommandInterface::getVehicleTypeIds() {
 	return genericGetStringList(CMD_GET_VEHICLETYPE_VARIABLE, "", ID_LIST, RESPONSE_GET_VEHICLETYPE_VARIABLE);

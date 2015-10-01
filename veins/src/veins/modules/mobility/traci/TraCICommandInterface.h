@@ -30,6 +30,8 @@ class TraCICommandInterface
 		double getDistance(const Coord& position1, const Coord& position2, bool returnDrivingDistance);
 
 		// Vehicle methods
+        std::list<std::string> getVehicleIds();
+        int getVehicleCount();
 		bool addVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, simtime_t emitTime_st = -DEPART_NOW, double emitPosition = -DEPART_POS_BASE, double emitSpeed = -DEPART_SPEED_MAX, int8_t emitLane = -DEPART_LANE_BEST_FREE);
 		class Vehicle {
 			public:
