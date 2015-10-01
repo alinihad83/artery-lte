@@ -22,6 +22,7 @@
 #include <cppconn/prepared_statement.h>
 
 #include <string>
+#include <artery/messages/LTEReport_m.h>
 
 class ServerDatabase {
 
@@ -31,6 +32,7 @@ protected:
     sql::PreparedStatement *prep_stmt_insert_vehicle;
     sql::PreparedStatement *prep_stmt_insert_section;
     sql::PreparedStatement *prep_stmt_insert_traci;
+    sql::PreparedStatement *prep_stmt_insert_report;
     sql::PreparedStatement *prep_stmt_select_section_id;
 
 public:
@@ -40,6 +42,10 @@ public:
     virtual void insertVehicle(std::string id, std::string type, double length);
     virtual void insertSection(std::pair< std::string, int32_t > section, double length);
     virtual void insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position);
+    virtual void insertLTEReport(LTEReport *report, uint64_t simtime_rx);
+
+private:
+    int32_t getSectionId(const std::pair<std::string, int32_t>& section);
 };
 
 #endif /* SERVERDATABASE_H_ */
