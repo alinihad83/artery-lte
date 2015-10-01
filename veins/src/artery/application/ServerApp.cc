@@ -41,10 +41,11 @@ void ServerApp::finish() {
     std::cout << "[ServerApp] Received " << receivedMessagesViaDsrc << " messages via DSRC." << std::endl;
 }
 
+
 void ServerApp::handleMessageWhenUp(cMessage *msg) {
     if (!msg->isSelfMessage()) {
         int gateId = msg->getArrivalGateId();
-        if (gateId == udpIn) {
+        if (gateId == udpIn) { // Message arrived via LTE
 
             cPacket* report = dynamic_cast<cPacket*>(msg);
 
@@ -63,59 +64,77 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
             }
 
         }
-    } else if (msg->isName("self") && simTime() > 0) {
+    } else if (msg->isName("self") && simTime() > 0) { // Self messages
 
-            traci = scenarioManager->getCommandInterface();
+        storeTraCISnapshot();
 
-            // Get the information of all vehicles in the simulation via TraCI and store it in the database
-            std::list<std::string> allVehicles = traci->getVehicleIds();
-
-            for (std::list<std::string>::const_iterator it = allVehicles.begin(); it != allVehicles.end(); it++) {
-                std::string vehicleId = it->c_str();
-                Veins::TraCICommandInterface::Vehicle v = traci->vehicle(vehicleId);
-
-                // Vehicle already processed in an earlier iteration?
-                const bool is_vehicle_processed = insertedVehicles.find(vehicleId) != insertedVehicles.end();
-
-                if (!is_vehicle_processed) {
-                    double length = traci->vehicletype(v.getTypeId()).getLength();
-                    db->insertVehicle(vehicleId, v.getTypeId(), length);
-                    insertedVehicles.insert(vehicleId);
-                }
-
-                // Process lane / section
-
-                std::string roadId = v.getRoadId();
-                int32_t laneIndex = v.getLaneIndex();
-
-                std::pair<std::string, int32_t> section(roadId, laneIndex);
-
-                // Lane already processed in an earlier iteration?
-                const bool is_lane_processed = insertedSections.find(section) != insertedSections.end();
-
-                if (!is_lane_processed) {
-                    // Get the information of the specific lane and store it in the database if not processed before
-                    Veins::TraCICommandInterface::Lane l = traci->lane(roadId + '_' + std::to_string(laneIndex));
-                    double laneLength = l.getLength();
-
-                    db->insertSection(section, laneLength);
-                    insertedSections.insert(section);
-                }
-
-
-                // Store ground truth vehicle information
-
-                double lanePosition = v.getLanePosition();
-                double speed = v.getSpeed();
-                uint64_t simtime = simTime().raw(); // FIXME: Raw int64 of class OPP::SimTime may not be the best/correct way...
-                db->insertTraCI(vehicleId, section, simtime, speed, lanePosition);
-            }
-
-
-
-            scheduleAt(simTime() + traciLogInterval, new cMessage("self")); //schedule next measurement
+        scheduleAt(simTime() + traciLogInterval, new cMessage("self")); //schedule next measurement
     }
     delete msg; // FIXME warning: can't find linker symbol for virtual table for `cMessage' value
+}
+
+/**
+ * Get the information of all vehicles in the simulation via TraCI and store it in the database
+ */
+void ServerApp::storeTraCISnapshot() {
+
+    traci = scenarioManager->getCommandInterface();
+
+    std::list<std::string> allVehicles = traci->getVehicleIds();
+
+    for (std::list<std::string>::const_iterator it = allVehicles.begin(); it != allVehicles.end(); it++) {
+        std::string vehicleId = it->c_str();
+        Veins::TraCICommandInterface::Vehicle v = traci->vehicle(vehicleId);
+
+        // Make sure vehicle is in database
+        storeVehicle(vehicleId, v);
+
+        // Get road information
+        std::string roadId = v.getRoadId();
+        int32_t laneIndex = v.getLaneIndex();
+        std::pair<std::string, int32_t> section(roadId, laneIndex);
+
+        double lanePosition = v.getLanePosition();
+        double speed = v.getSpeed();
+
+        // Make sure lane section is in database
+        storeSection(section);
+
+        // Store ground truth vehicle information
+        uint64_t simtime = simTime().raw(); // FIXME: Raw int64 of class OPP::SimTime may not be the best/correct way...
+        db->insertTraCI(vehicleId, section, simtime, speed, lanePosition);
+    }
+}
+
+/**
+ * Store unique vehicle if not already processed in an earlier iteration
+ */
+void ServerApp::storeVehicle(const std::string& vehicleId, Veins::TraCICommandInterface::Vehicle& v) {
+    const bool is_vehicle_processed = insertedVehicles.find(vehicleId) != insertedVehicles.end();
+
+    if (!is_vehicle_processed) {
+        double length = traci->vehicletype(v.getTypeId()).getLength();
+
+        db->insertVehicle(vehicleId, v.getTypeId(), length);
+        insertedVehicles.insert(vehicleId);
+    }
+
+}
+
+/**
+ * Store unique lane section if not already processed in an earlier iteration
+ */
+void ServerApp::storeSection(const std::pair<std::string, int32_t>& section) {
+    const bool is_lane_processed = insertedSections.find(section) != insertedSections.end();
+
+    if (!is_lane_processed) {
+        Veins::TraCICommandInterface::Lane l = traci->lane(section.first + '_' + std::to_string(section.second));
+        double laneLength = l.getLength();
+
+        db->insertSection(section, laneLength);
+        insertedSections.insert(section);
+    }
+
 }
 
 bool ServerApp::handleNodeStart(IDoneCallback *doneCallback) {

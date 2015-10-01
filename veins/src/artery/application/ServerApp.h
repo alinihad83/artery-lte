@@ -70,6 +70,11 @@ public:
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
+
+private:
+    void storeTraCISnapshot();
+    void storeVehicle(const std::string& vehicleId, Veins::TraCICommandInterface::Vehicle& v);
+    void storeSection(const std::pair<std::string, int32_t>& section);
 };
 
 #endif /* SERVERAPP_H_ */
