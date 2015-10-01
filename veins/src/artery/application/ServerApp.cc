@@ -1,5 +1,6 @@
 #include "ServerApp.h"
 #include <string.h>
+#include <list>
 #include <artery/messages/LTEReport_m.h>
 
 Define_Module(ServerApp);
@@ -22,7 +23,13 @@ void ServerApp::initialize(int stage) {
         udpIn = findGate("udpIn");
         udpOut = findGate("udpOut");
 
-        //scheduleAt(simTime() + traciLogInterval, new cMessage("self")); // FIXME: when is the right time for initialization?
+        scenarioManager = TraCIScenarioManagerAccess().get();
+        ASSERT(scenarioManager);
+
+        // Open database connection
+        db = new ServerDatabase();
+
+        scheduleAt(simTime() + traciLogInterval, new cMessage("self")); // FIXME: when is the right time for initialization?
     }
 }
 
@@ -49,13 +56,43 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
                     std::string source = lte->getSrc();
                     receivedBytes += lte->getByteLength();
                     std::cout << "[ServerApp] Received LTEReport from " <<  source << std::endl;
+
                 }
             }
 
         }
+    } else if (msg->isName("self") && simTime() > 0) {
+
+            traci = scenarioManager->getCommandInterface();
+
+            // Get the information of all vehicles in the simulation via TraCI and store it in the database
+            std::list<std::string> allVehicles = traci->getVehicleIds();
+
+            for (std::list<std::string>::const_iterator it = allVehicles.begin(); it != allVehicles.end(); it++) {
+                std::string vehicleId = it->c_str();
+                Veins::TraCICommandInterface::Vehicle v = traci->vehicle(vehicleId);
+
+                // Vehicle already processed in an earlier iteration?
+                const bool is_in = insertedVehicles.find(vehicleId) != insertedVehicles.end();
+
+                if (!is_in) {
+                    double length = traci->vehicletype(v.getTypeId()).getLength();
+                    db->insertVehicle(vehicleId, v.getTypeId(), length);
+                    insertedVehicles.insert(vehicleId);
+                }
+
+                //std::string roadId = v.getRoadId();
+                //int32_t laneIndex = v.getLaneIndex();
+
+                //double lanePosition = v.getLanePosition();
+                //double speed = v.getSpeed();
+                simtime_t simtime = simTime();
+                // inserTraci(it->c_str());
+            }
+
+            scheduleAt(simTime() + traciLogInterval, new cMessage("self")); //schedule next measurement
     }
     delete msg; // FIXME warning: can't find linker symbol for virtual table for `cMessage' value
-
 }
 
 bool ServerApp::handleNodeStart(IDoneCallback *doneCallback) {
