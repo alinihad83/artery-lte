@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS meta;
 
 CREATE TABLE artery_run (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     run_number INT NOT NULL,
+     run_number INT UNSIGNED NOT NULL,
      network VARCHAR(80) NOT NULL,
      date TIMESTAMP NOT NULL
 );
@@ -31,11 +31,11 @@ CREATE TABLE sections (
 
 CREATE TABLE traci (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     runid INT NOT NULL REFERENCES artery_run (id),
-     simtime INT NOT NULL,
-     vehicle INT NOT NULL REFERENCES vehicles (id), 
+#    runid INT NOT NULL REFERENCES artery_run (id),
+     simtime BIGINT UNSIGNED NOT NULL,
+     vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
      speed DOUBLE PRECISION NOT NULL, 
-     section INT NOT NULL REFERENCES sections (id), 
+     section INT UNSIGNED NOT NULL REFERENCES sections (id), 
      position DOUBLE PRECISION NOT NULL
 ) ENGINE = MYISAM;
 
