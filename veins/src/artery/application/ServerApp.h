@@ -74,6 +74,7 @@ public:
 private:
     void storeTraCISnapshot();
     void storeVehicle(const std::string& vehicleId, Veins::TraCICommandInterface::Vehicle& v);
+    void storeSection(const std::string roadId, const int32_t laneIndex);
     void storeSection(const std::pair<std::string, int32_t>& section);
 };
 

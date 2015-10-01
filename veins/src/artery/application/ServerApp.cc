@@ -47,22 +47,33 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
         int gateId = msg->getArrivalGateId();
         if (gateId == udpIn) { // Message arrived via LTE
 
-            cPacket* report = dynamic_cast<cPacket*>(msg);
+            cPacket* packet = dynamic_cast<cPacket*>(msg);
 
-            if (report != NULL && simTime() > 0) {
+            if (packet != NULL && simTime() > 0) {
 
-                LTEReport* lte = dynamic_cast<LTEReport*>(report);
+                LTEReport* report = dynamic_cast<LTEReport*>(packet);
 
-                if (lte != NULL && simTime() > 0) {
+                if (report != NULL) {
 
+                    traci = scenarioManager->getCommandInterface();
+                    Veins::TraCICommandInterface::Vehicle v = traci->vehicle(report->getSrc());
+
+                    // Make sure vehicle is in database
+                    storeVehicle(report->getSrc(), v);
+
+                    // Make sure lane section is in database
+                    storeSection(v.getRoadId(), v.getLaneIndex());
+
+                    // Store LTE report
+                    uint64_t simtime_rx = simTime().raw();
+                    db->insertLTEReport(report, simtime_rx);
+
+                    // Update statistics
                     ++receivedMessagesViaLte;
-                    std::string source = lte->getSrc();
-                    receivedBytes += lte->getByteLength();
-                    std::cout << "[ServerApp] Received LTEReport from " <<  source << std::endl;
-
+                    receivedBytes += report->getByteLength();
+                    std::cout << "[ServerApp] Received LTEReport from " <<  report->getSrc() << std::endl;
                 }
             }
-
         }
     } else if (msg->isName("self") && simTime() > 0) { // Self messages
 
@@ -90,10 +101,7 @@ void ServerApp::storeTraCISnapshot() {
         storeVehicle(vehicleId, v);
 
         // Get road information
-        std::string roadId = v.getRoadId();
-        int32_t laneIndex = v.getLaneIndex();
-        std::pair<std::string, int32_t> section(roadId, laneIndex);
-
+        std::pair<std::string, int32_t> section(v.getRoadId(), v.getLaneIndex());
         double lanePosition = v.getLanePosition();
         double speed = v.getSpeed();
 
@@ -118,7 +126,15 @@ void ServerApp::storeVehicle(const std::string& vehicleId, Veins::TraCICommandIn
         db->insertVehicle(vehicleId, v.getTypeId(), length);
         insertedVehicles.insert(vehicleId);
     }
+}
 
+
+/**
+ * Store unique lane section if not already processed in an earlier iteration
+ */
+void ServerApp::storeSection(const std::string roadId, const int32_t laneIndex) {
+    std::pair<std::string, int32_t> section(roadId, laneIndex);
+    storeSection(section);
 }
 
 /**
@@ -134,7 +150,6 @@ void ServerApp::storeSection(const std::pair<std::string, int32_t>& section) {
         db->insertSection(section, laneLength);
         insertedSections.insert(section);
     }
-
 }
 
 bool ServerApp::handleNodeStart(IDoneCallback *doneCallback) {
