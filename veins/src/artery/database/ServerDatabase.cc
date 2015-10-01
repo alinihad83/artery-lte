@@ -45,10 +45,10 @@ ServerDatabase::~ServerDatabase() {
 
 void ServerDatabase::insertVehicle(std::string id, std::string type, double length) {
     try {
-
         prep_stmt_insert_vehicle->setString(1, id);
         prep_stmt_insert_vehicle->setString(2, type);
         prep_stmt_insert_vehicle->setDouble(3, length);
+
         prep_stmt_insert_vehicle->executeUpdate();
 
     } catch (sql::SQLException &e) {
@@ -62,10 +62,10 @@ void ServerDatabase::insertVehicle(std::string id, std::string type, double leng
 
 void ServerDatabase::insertSection(std::pair< std::string, int32_t > section, double length) {
     try {
-
         prep_stmt_insert_section->setString(1, section.first);
         prep_stmt_insert_section->setInt(2, section.second);
         prep_stmt_insert_section->setDouble(3, length);
+
         prep_stmt_insert_section->executeUpdate();
 
     } catch (sql::SQLException &e) {
@@ -97,7 +97,6 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
 
 void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position) {
     try {
-
         int32_t sectionId = getSectionId(section);
 
         // (vehicle, section, simtime, speed, position)
@@ -120,7 +119,6 @@ void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, 
 
 void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtime_rx) {
     try {
-
         std::pair<std::string, int32_t> section(report->getRoadId(), report->getLaneIndex());
         int32_t sectionId = getSectionId(section);
 

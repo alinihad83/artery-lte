@@ -25,6 +25,7 @@ Define_Module(ExampleService);
 
 using namespace vanetza;
 
+// TODO rename
 ExampleService::ExampleService()
 {
 }
@@ -48,6 +49,7 @@ void ExampleService::initialize()
 	m_self_msg = new cMessage("Example Service");
 	subscribe(scSignalCamReceived);
 
+	// TODO parameterize
 	scheduleAt(simTime() + 3.0, m_self_msg);
 }
 
