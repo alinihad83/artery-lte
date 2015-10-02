@@ -21,9 +21,8 @@ ServerDatabase::ServerDatabase() {
 
         // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
         // It is best to create the tables with the ENGINE = MYISAM option.
-        // TODO INSERT DELAYED necessary?
-        prep_stmt_insert_traci = con->prepareStatement("INSERT INTO traci(vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?)");
-        prep_stmt_insert_report = con->prepareStatement("INSERT INTO reports(vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?)");
+        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
