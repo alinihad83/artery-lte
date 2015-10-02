@@ -51,21 +51,22 @@ ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<cPacket> payload){
     Enter_Method ("request");
 
-    // implement connection to LTE-module
-    IPv4Address address = IPvXAddressResolver().resolve("server").get4();
-    if (address.isUnspecified()) {
-        address = manager->getIPAddressForID("server");
-    }
-    if (address.isUnspecified()) {
-        opp_error("Address of server still unspecified!");
-        return;
-    }
-
     cPacket *tmp = payload.release();
     LTEReport *lteReport = dynamic_cast<LTEReport* >(tmp);
     this->take(lteReport);
 
-    if (lteReport != null) {
+    if (lteReport != nullptr) {
+
+        // implement connection to LTE-module
+           IPv4Address address = IPvXAddressResolver().resolve(lteReport->getDst()).get4();
+           if (address.isUnspecified()) {
+               address = manager->getIPAddressForID(lteReport->getDst());
+           }
+           if (address.isUnspecified()) {
+               opp_error((std::string("Address of ") + lteReport->getDst() + " still unspecified!").c_str());
+               return;
+           }
+
         std::cout << "[ITSG5Middleware] Sending LTEReport from " << lteReport->getSrc() << std::endl;
         socket.sendTo(lteReport, address, ltePort);
     } else {
