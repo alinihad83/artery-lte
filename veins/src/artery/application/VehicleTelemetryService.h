@@ -35,6 +35,7 @@ class VehicleTelemetryService : public ItsG5Service
 
     private:
         cMessage* m_self_msg;
+        simtime_t lteTransmissionInterval;
 };
 
 #endif /* VEHICLETELEMETRYSERVICE_H_ */

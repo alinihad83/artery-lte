@@ -46,6 +46,7 @@ void VehicleTelemetryService::initialize()
 {
 	ItsG5BaseService::initialize();
 	m_self_msg = new cMessage("Example Service");
+	lteTransmissionInterval = par("lteTransmissionInterval");
 	subscribe(scSignalCamReceived);
 
 	// TODO parameterize
