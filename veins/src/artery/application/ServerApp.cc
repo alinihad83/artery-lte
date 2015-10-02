@@ -31,7 +31,8 @@ void ServerApp::initialize(int stage) {
         // Open database connection
         db = new ServerDatabase();
 
-        scheduleAt(simTime() + traciLogInterval, new cMessage("self")); // FIXME: when is the right time for initialization?
+    } else if (stage == 1) {
+        scheduleAt(simTime() + traciLogInterval, new cMessage("self"));
     }
 }
 
@@ -81,7 +82,7 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
 
         scheduleAt(simTime() + traciLogInterval, new cMessage("self")); //schedule next measurement
     }
-    delete msg; // FIXME warning: can't find linker symbol for virtual table for `cMessage' value
+    delete msg;
 }
 
 /**
@@ -109,7 +110,7 @@ void ServerApp::storeTraCISnapshot() {
         storeSection(section);
 
         // Store ground truth vehicle information
-        uint64_t simtime = simTime().raw(); // FIXME: Raw int64 of class OPP::SimTime may not be the best/correct way...
+        uint64_t simtime = simTime().raw();
         db->insertTraCI(vehicleId, section, simtime, speed, lanePosition);
     }
 }
