@@ -15,6 +15,6 @@
 
 package artery.application;
 
-simple ExampleService like ItsG5Service
+simple VehicleTelemetryService like ItsG5Service
 {
 }

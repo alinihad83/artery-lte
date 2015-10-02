@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ExampleService.h"
+#include "VehicleTelemetryService.h"
 #include <vanetza/btp/data_request.hpp>
 #include <vanetza/dcc/profile.hpp>
 #include <vanetza/geonet/interface.hpp>
@@ -21,20 +21,19 @@
 
 static const simsignal_t scSignalCamReceived = cComponent::registerSignal("CaService.received");
 
-Define_Module(ExampleService);
+Define_Module(VehicleTelemetryService);
 
 using namespace vanetza;
 
-// TODO rename
-ExampleService::ExampleService()
+VehicleTelemetryService::VehicleTelemetryService()
 {
 }
 
-ExampleService::~ExampleService()
+VehicleTelemetryService::~VehicleTelemetryService()
 {
 }
 
-void ExampleService::indicate(const btp::DataIndication& ind, cPacket* packet)
+void VehicleTelemetryService::indicate(const btp::DataIndication& ind, cPacket* packet)
 {
 	if (packet->getByteLength() == 42) {
 		findHost()->bubble("packet indication");
@@ -43,7 +42,7 @@ void ExampleService::indicate(const btp::DataIndication& ind, cPacket* packet)
 	delete(packet);
 }
 
-void ExampleService::initialize()
+void VehicleTelemetryService::initialize()
 {
 	ItsG5BaseService::initialize();
 	m_self_msg = new cMessage("Example Service");
@@ -53,12 +52,12 @@ void ExampleService::initialize()
 	scheduleAt(simTime() + 3.0, m_self_msg);
 }
 
-void ExampleService::finish()
+void VehicleTelemetryService::finish()
 {
 	cancelAndDelete(m_self_msg);
 }
 
-void ExampleService::handleMessage(cMessage* msg)
+void VehicleTelemetryService::handleMessage(cMessage* msg)
 {
 	Enter_Method("handleMessage");
 	if (msg == m_self_msg) {
@@ -66,7 +65,7 @@ void ExampleService::handleMessage(cMessage* msg)
 	}
 }
 
-void ExampleService::trigger()
+void VehicleTelemetryService::trigger()
 {
 	Enter_Method("trigger");
 	btp::DataRequestB req;
@@ -102,7 +101,7 @@ void ExampleService::trigger()
     request(req, report, true);
 }
 
-void ExampleService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)
+void VehicleTelemetryService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)
 {
 	if (signal == scSignalCamReceived && valid) {
 		EV << "Vehicle " << getFacilities().getMobility().getExternalId() << " received a CAM in sibling serivce\n";

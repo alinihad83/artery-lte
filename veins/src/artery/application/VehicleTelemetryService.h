@@ -13,16 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef EXAMPLESERVICE_H_
-#define EXAMPLESERVICE_H_
+#ifndef VEHICLETELEMETRYSERVICE_H_
+#define VEHICLETELEMETRYSERVICE_H_
 
 #include "ItsG5Service.h"
 
-class ExampleService : public ItsG5Service
+class VehicleTelemetryService : public ItsG5Service
 {
     public:
-        ExampleService();
-        virtual ~ExampleService();
+        VehicleTelemetryService();
+        virtual ~VehicleTelemetryService();
 
         void indicate(const vanetza::btp::DataIndication&, cPacket*) override;
         void trigger() override;
@@ -37,4 +37,4 @@ class ExampleService : public ItsG5Service
         cMessage* m_self_msg;
 };
 
-#endif /* EXAMPLESERVICE_H_ */
+#endif /* VEHICLETELEMETRYSERVICE_H_ */
