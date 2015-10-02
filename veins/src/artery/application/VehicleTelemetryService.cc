@@ -45,61 +45,61 @@ void VehicleTelemetryService::indicate(const btp::DataIndication& ind, cPacket* 
 void VehicleTelemetryService::initialize()
 {
 	ItsG5BaseService::initialize();
-	m_self_msg = new cMessage("Example Service");
 	lteTransmissionInterval = par("lteTransmissionInterval");
+	lastMessageSent = 0;
 	subscribe(scSignalCamReceived);
-
-	// TODO parameterize
-	scheduleAt(simTime() + 3.0, m_self_msg);
 }
 
 void VehicleTelemetryService::finish()
 {
-	cancelAndDelete(m_self_msg);
 }
 
 void VehicleTelemetryService::handleMessage(cMessage* msg)
 {
 	Enter_Method("handleMessage");
-	if (msg == m_self_msg) {
-		findHost()->bubble("self message");
-	}
 }
 
 void VehicleTelemetryService::trigger()
 {
 	Enter_Method("trigger");
-	btp::DataRequestB req;
-	req.destination_port = host_cast<ExampleService::port_type>(getPortNumber());
-	req.gn.transport_type = geonet::TransportType::SHB;
-	req.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP3));
-	req.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
-	// simulation info
-    simtime_t time = simTime();
+	if (simTime() - lastMessageSent > lteTransmissionInterval) {
 
-	// vehicle info
-	std::string sumoId = getFacilities().getMobility().getExternalId();
-    std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
-    int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
-    double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
-    double speed = getFacilities().getMobility().getSpeed();
-    std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
-    double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();
+	    btp::DataRequestB req;
+	    req.destination_port = host_cast<VehicleTelemetryService::port_type>(getPortNumber());
+	    req.gn.transport_type = geonet::TransportType::SHB;
+	    req.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP3));
+	    req.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
-	LTEReport *report = new LTEReport();
-	report->setDst("server");
-	report->setSrc(sumoId.c_str());
-	report->setRoadId(roadId.c_str());
-	report->setLaneIndex(laneIndex);
-	report->setLanePosition(lanePosition);
-	report->setSpeed(speed);
-	report->setVehicleType(vehicleType.c_str());
-	report->setVehicleLength(vehicleLength);
-	report->setByteLength(42); //TODO set actual byte length
-	report->setSendingTime(time);
+	    lastMessageSent = simTime();
 
-    request(req, report, true);
+	        // simulation info
+	        simtime_t time = simTime();
+
+	        // vehicle info
+	        std::string sumoId = getFacilities().getMobility().getExternalId();
+	        std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
+	        int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
+	        double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
+	        double speed = getFacilities().getMobility().getSpeed();
+	        std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
+	        double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();
+
+	        LTEReport *report = new LTEReport();
+	        report->setDst("server");
+	        report->setSrc(sumoId.c_str());
+	        report->setRoadId(roadId.c_str());
+	        report->setLaneIndex(laneIndex);
+	        report->setLanePosition(lanePosition);
+	        report->setSpeed(speed);
+	        report->setVehicleType(vehicleType.c_str());
+	        report->setVehicleLength(vehicleLength);
+	        report->setByteLength(42); //TODO set actual byte length
+	        report->setSendingTime(time);
+
+	        request(req, report, true);
+	}
+
 }
 
 void VehicleTelemetryService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)
