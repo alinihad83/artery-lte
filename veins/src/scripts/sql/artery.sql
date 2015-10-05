@@ -32,7 +32,7 @@ CREATE TABLE sections (
 
 CREATE TABLE traci (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-#    runid INT NOT NULL REFERENCES artery_run (id),
+     runid INT NOT NULL REFERENCES artery_run (id),
      simtime BIGINT UNSIGNED NOT NULL,
      vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
      speed DOUBLE PRECISION NOT NULL, 
@@ -42,7 +42,7 @@ CREATE TABLE traci (
 
 CREATE TABLE reports (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-#    runid INT NOT NULL REFERENCES artery_run (id),
+     runid INT NOT NULL REFERENCES artery_run (id),
      vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
      section INT UNSIGNED NOT NULL REFERENCES sections (id), 
      speed DOUBLE PRECISION NOT NULL, 

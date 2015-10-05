@@ -34,8 +34,8 @@ ServerDatabase::ServerDatabase() {
 
         // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
         // It is best to create the tables with the ENGINE = MYISAM option.
-        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?)");
-        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?, ?)");
+        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
         storeRunId();
 
@@ -85,6 +85,7 @@ void ServerDatabase::storeRunId() {
     int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
     std::string network = simulation.getNetworkType()->getName();
     std::time_t date = std::time(nullptr);
+
     currentRunId = this->insertRun(runNumber, network, date);
 }
 
@@ -179,12 +180,13 @@ void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, 
     try {
         int32_t sectionId = getSectionId(section);
 
-        // (vehicle, section, simtime, speed, position)
-        prep_stmt_insert_traci->setString(1, vehicleId);
-        prep_stmt_insert_traci->setInt(2, sectionId);
-        prep_stmt_insert_traci->setInt64(3, simtime);
-        prep_stmt_insert_traci->setDouble(4, speed);
-        prep_stmt_insert_traci->setDouble(5, position);
+        // (runid, vehicle, section, simtime, speed, position)
+        prep_stmt_insert_traci->setInt(1, currentRunId);
+        prep_stmt_insert_traci->setString(2, vehicleId);
+        prep_stmt_insert_traci->setInt(3, sectionId);
+        prep_stmt_insert_traci->setInt64(4, simtime);
+        prep_stmt_insert_traci->setDouble(5, speed);
+        prep_stmt_insert_traci->setDouble(6, position);
 
         prep_stmt_insert_traci->executeUpdate();
 
@@ -202,14 +204,15 @@ void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtime_rx) {
         std::pair<std::string, int32_t> section(report->getRoadId(), report->getLaneIndex());
         int32_t sectionId = getSectionId(section);
 
-        // (vehicle, section, speed, position, simtime_tx, simtime_rx, bytes)
-        prep_stmt_insert_report->setString(1, report->getSrc());
-        prep_stmt_insert_report->setInt(2, sectionId);
-        prep_stmt_insert_report->setDouble(3, report->getSpeed());
-        prep_stmt_insert_report->setDouble(4, report->getLanePosition());
-        prep_stmt_insert_report->setInt64(5, report->getSendingTime().raw());
-        prep_stmt_insert_report->setInt64(6, simtime_rx);
-        prep_stmt_insert_report->setInt64(7, report->getByteLength());
+        // (runid, vehicle, section, speed, position, simtime_tx, simtime_rx, bytes)
+        prep_stmt_insert_report->setInt(1, currentRunId);
+        prep_stmt_insert_report->setString(2, report->getSrc());
+        prep_stmt_insert_report->setInt(3, sectionId);
+        prep_stmt_insert_report->setDouble(4, report->getSpeed());
+        prep_stmt_insert_report->setDouble(5, report->getLanePosition());
+        prep_stmt_insert_report->setInt64(6, report->getSendingTime().raw());
+        prep_stmt_insert_report->setInt64(7, simtime_rx);
+        prep_stmt_insert_report->setInt64(8, report->getByteLength());
 
         prep_stmt_insert_report->executeUpdate();
 
