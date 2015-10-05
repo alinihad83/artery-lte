@@ -109,13 +109,14 @@ void ServerApp::storeTraCISnapshot() {
         std::pair<std::string, int32_t> section(v.getRoadId(), v.getLaneIndex());
         double lanePosition = v.getLanePosition();
         double speed = v.getSpeed();
+        Coord pos = v.getPosition();
 
         // Make sure lane section is in database
         storeSection(section);
 
         // Store ground truth vehicle information
         uint64_t simtime = simTime().raw();
-        db->insertTraCI(vehicleId, section, simtime, speed, lanePosition);
+        db->insertTraCI(vehicleId, section, simtime, speed, lanePosition, pos.x, pos.y);
     }
 }
 

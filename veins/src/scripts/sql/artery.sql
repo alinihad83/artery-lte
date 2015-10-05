@@ -37,7 +37,9 @@ CREATE TABLE traci (
      vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
      speed DOUBLE PRECISION NOT NULL, 
      section INT UNSIGNED NOT NULL REFERENCES sections (id), 
-     position DOUBLE PRECISION NOT NULL
+     position_lane DOUBLE PRECISION NOT NULL,
+     position_x DOUBLE PRECISION NOT NULL,
+     position_y DOUBLE PRECISION NOT NULL
 ) ENGINE = MYISAM;
 
 CREATE TABLE reports (
@@ -46,7 +48,9 @@ CREATE TABLE reports (
      vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
      section INT UNSIGNED NOT NULL REFERENCES sections (id), 
      speed DOUBLE PRECISION NOT NULL, 
-     position DOUBLE PRECISION NOT NULL,
+     position_lane DOUBLE PRECISION NOT NULL,
+     position_x DOUBLE PRECISION NOT NULL,
+     position_y DOUBLE PRECISION NOT NULL,
      simtime_tx BIGINT UNSIGNED NOT NULL,
      simtime_rx BIGINT UNSIGNED NOT NULL,
      bytes BIGINT UNSIGNED

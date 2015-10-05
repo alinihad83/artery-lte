@@ -34,8 +34,8 @@ ServerDatabase::ServerDatabase() {
 
         // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
         // It is best to create the tables with the ENGINE = MYISAM option.
-        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?, ?)");
-        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position_lane, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         storeRunId();
 
@@ -176,7 +176,7 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
     return sectionId;
 }
 
-void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position) {
+void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position_lane, double position_x, double position_y) {
     try {
         int32_t sectionId = getSectionId(section);
 
@@ -186,7 +186,9 @@ void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, 
         prep_stmt_insert_traci->setInt(3, sectionId);
         prep_stmt_insert_traci->setInt64(4, simtime);
         prep_stmt_insert_traci->setDouble(5, speed);
-        prep_stmt_insert_traci->setDouble(6, position);
+        prep_stmt_insert_traci->setDouble(6, position_lane);
+        prep_stmt_insert_traci->setDouble(7, position_x);
+        prep_stmt_insert_traci->setDouble(8, position_y);
 
         prep_stmt_insert_traci->executeUpdate();
 
@@ -213,6 +215,8 @@ void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtime_rx) {
         prep_stmt_insert_report->setInt64(6, report->getSendingTime().raw());
         prep_stmt_insert_report->setInt64(7, simtime_rx);
         prep_stmt_insert_report->setInt64(8, report->getByteLength());
+        prep_stmt_insert_report->setDouble(9, report->getXPosition());
+        prep_stmt_insert_report->setDouble(10, report->getYPosition());
 
         prep_stmt_insert_report->executeUpdate();
 

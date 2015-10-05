@@ -45,7 +45,7 @@ public:
     virtual int32_t insertRun(int number, std::string network, std::time_t date);
     virtual void insertVehicle(std::string id, std::string type, double length);
     virtual void insertSection(std::pair< std::string, int32_t > section, double length);
-    virtual void insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position);
+    virtual void insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position_lane, double position_x, double position_y);
     virtual void insertLTEReport(LTEReport *report, uint64_t simtime_rx);
 
 private:

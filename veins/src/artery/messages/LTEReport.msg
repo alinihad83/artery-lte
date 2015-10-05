@@ -22,6 +22,8 @@ packet LTEReport {
 	string roadId;
 	int32_t laneIndex;
 	double lanePosition;
+	double xPosition;
+	double yPosition;
 	double speed;
 	string vehicleType;
 	double vehicleLength;

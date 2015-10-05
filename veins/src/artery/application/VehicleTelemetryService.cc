@@ -85,6 +85,8 @@ void VehicleTelemetryService::trigger()
 	        std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
 	        int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
 	        double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
+	        double xPos = getFacilities().getMobility().getCurrentPosition().x;
+	        double yPos = getFacilities().getMobility().getCurrentPosition().y;
 	        double speed = getFacilities().getMobility().getSpeed();
 	        std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
 	        double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();
@@ -94,6 +96,8 @@ void VehicleTelemetryService::trigger()
 	        report->setSrc(sumoId.c_str());
 	        report->setRoadId(roadId.c_str());
 	        report->setLaneIndex(laneIndex);
+	        report->setXPosition(xPos);
+	        report->setYPosition(yPos);
 	        report->setLanePosition(lanePosition);
 	        report->setSpeed(speed);
 	        report->setVehicleType(vehicleType.c_str());
