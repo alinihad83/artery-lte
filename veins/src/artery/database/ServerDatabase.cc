@@ -5,15 +5,37 @@
  *      Author: timpner
  */
 
+#include <sstream>
 #include <artery/database/ServerDatabase.h>
+
+Register_PerObjectConfigOption(CFGID_MARIADB_HOST,       "mysql-host",         KIND_NONE, CFG_STRING,   "\"\"",  "Hostname of mysql server");
+Register_PerObjectConfigOption(CFGID_MARIADB_USER,       "mysql-user",         KIND_NONE, CFG_STRING,   "\"\"",  "User name for mysql server");
+Register_PerObjectConfigOption(CFGID_MARIADB_PASSWD,     "mysql-password",     KIND_NONE, CFG_STRING,   "\"\"",  "Password for mysql server");
+Register_PerObjectConfigOption(CFGID_MARIADB_DB,         "mysql-database",     KIND_NONE, CFG_STRING,   "\"\"",  "Database name");
+Register_PerObjectConfigOption(CFGID_MARIADB_PORT,       "mysql-port",         KIND_NONE, CFG_INT,      "0",     "Port of mysql server");
 
 ServerDatabase::ServerDatabase() {
     try {
+
+        // read config from omnetpp.ini
+        std::string cfgobj = "mysql";
+
+        cConfiguration *cfg = ev.getConfig();
+        std::string host = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_HOST, NULL);
+        std::string user = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_USER, NULL);
+        std::string passwd = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_PASSWD, NULL);
+        std::string db = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_DB, NULL);
+        unsigned int port = (unsigned int) cfg->getAsInt(cfgobj.c_str(), CFGID_MARIADB_PORT, 0);
+
+        std::stringstream ss;
+        ss << "tcp://" << host << ":" << port;
+        std::string fullHost = ss.str();
+
         /* Create a connection */
         driver = get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "omnetpp", "omnetpp");
+        con = driver->connect(fullHost, user, passwd);
         /* Connect to the MySQL test database */
-        con->setSchema("artery");
+        con->setSchema(db);
 
         prep_stmt_insert_vehicle = con->prepareStatement("INSERT INTO vehicles(id, type, length) VALUES (?, ?, ?)");
         prep_stmt_insert_section = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
