@@ -37,14 +37,22 @@ ServerDatabase::ServerDatabase() {
         /* Connect to the MySQL test database */
         con->setSchema(db);
 
+        prep_stmt_insert_run = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
         prep_stmt_insert_vehicle = con->prepareStatement("INSERT INTO vehicles(id, type, length) VALUES (?, ?, ?)");
         prep_stmt_insert_section = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
         prep_stmt_select_section_id = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
+        prep_stmt_select_run_id = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
 
         // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
         // It is best to create the tables with the ENGINE = MYISAM option.
         prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?)");
         prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+        int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
+        std::string network = simulation.getNetworkType()->getName();
+        std::time_t date = std::time(nullptr);
+
+        currentRunId= this->insertRun(runNumber, network, date);
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
@@ -56,12 +64,47 @@ ServerDatabase::ServerDatabase() {
 }
 
 ServerDatabase::~ServerDatabase() {
+    delete prep_stmt_insert_run;
     delete prep_stmt_insert_vehicle;
     delete prep_stmt_insert_section;
     delete prep_stmt_insert_traci;
     delete prep_stmt_insert_report;
     delete prep_stmt_select_section_id;
+    delete prep_stmt_select_run_id;
     delete con;
+}
+
+int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t date) {
+
+    int32_t runId = -1;
+
+    try {
+        prep_stmt_insert_run->setInt(1, number);
+        prep_stmt_insert_run->setString(2, network);
+        prep_stmt_insert_run->setInt(3, date);
+
+        prep_stmt_insert_run->executeUpdate();
+
+        prep_stmt_select_run_id->setInt(1, number);
+        prep_stmt_select_run_id->setString(2, network);
+        prep_stmt_select_run_id->setInt(3, date);
+
+        sql::ResultSet* res = prep_stmt_select_run_id->executeQuery();
+
+        while (res->next()) {
+            // We expect 1 result
+            runId = res->getInt(1);
+        }
+
+    } catch (sql::SQLException &e) {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+
+    return runId;
 }
 
 void ServerDatabase::insertVehicle(std::string id, std::string type, double length) {
@@ -97,6 +140,7 @@ void ServerDatabase::insertSection(std::pair< std::string, int32_t > section, do
         std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
     }
 }
+
 
 int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& section) {
 
