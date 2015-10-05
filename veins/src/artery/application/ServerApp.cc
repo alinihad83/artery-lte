@@ -14,9 +14,11 @@ ServerApp::~ServerApp() {
 void ServerApp::initialize(int stage) {
     ApplicationBase::initialize(stage);
     if (stage == 0) {
-
         debug = par("debug").boolValue();
-        traciLogInterval = par("traciLogInterval").doubleValue();
+        if(debug){
+            std::cout << "Init " << this->getFullPath() << std::endl;
+        }
+        traciLogInterval = par("traciLogInterval");
 
         receivedMessagesViaLte = 0;
         receivedMessagesViaDsrc = 0;
@@ -50,11 +52,11 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
 
             cPacket* packet = dynamic_cast<cPacket*>(msg);
 
-            if (packet != NULL && simTime() > 0) {
+            if (packet != nullptr && simTime() > 0) {
 
                 LTEReport* report = dynamic_cast<LTEReport*>(packet);
 
-                if (report != NULL) {
+                if (report != nullptr) {
 
                     traci = scenarioManager->getCommandInterface();
                     Veins::TraCICommandInterface::Vehicle v = traci->vehicle(report->getSrc());
@@ -72,7 +74,9 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
                     // Update statistics
                     ++receivedMessagesViaLte;
                     receivedBytes += report->getByteLength();
-                    std::cout << "[ServerApp] Received LTEReport from " <<  report->getSrc() << std::endl;
+                    if(debug) {
+                        std::cout << "[ServerApp] Received LTEReport from " <<  report->getSrc() << std::endl;
+                    }
                 }
             }
         }

@@ -34,6 +34,7 @@ class VehicleTelemetryService : public ItsG5Service
         void handleMessage(cMessage*) override;
 
     private:
+        bool debug;
         simtime_t lastMessageSent;
         simtime_t lteTransmissionInterval;
 };

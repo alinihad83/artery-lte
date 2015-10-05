@@ -45,6 +45,10 @@ void VehicleTelemetryService::indicate(const btp::DataIndication& ind, cPacket* 
 void VehicleTelemetryService::initialize()
 {
 	ItsG5BaseService::initialize();
+	debug = par("debug").boolValue();
+	if(debug) {
+	    std::cout << "Init "<< this->getFullPath() << std::endl;
+	}
 	lteTransmissionInterval = par("lteTransmissionInterval");
 	lastMessageSent = 0;
 	subscribe(scSignalCamReceived);

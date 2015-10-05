@@ -40,9 +40,7 @@ protected:
     UDPSocket socket;
     long receivedMessagesViaLte;
     long receivedMessagesViaDsrc;
-    double traciLogInterval;
     long receivedBytes;
-    bool debug;
     int udpOut;
     int udpIn;
 
@@ -72,6 +70,8 @@ public:
     virtual void handleNodeCrash();
 
 private:
+    bool debug;
+    simtime_t traciLogInterval;
     void storeTraCISnapshot();
     void storeVehicle(const std::string& vehicleId, Veins::TraCICommandInterface::Vehicle& v);
     void storeSection(const std::string roadId, const int32_t laneIndex);
