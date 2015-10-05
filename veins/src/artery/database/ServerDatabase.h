@@ -49,8 +49,14 @@ public:
     virtual void insertLTEReport(LTEReport *report, uint64_t simtime_rx);
 
 private:
+    std::string fullHost;
+    std::string user;
+    std::string passwd;
+    std::string db;
     int32_t currentRunId;
     int32_t getSectionId(const std::pair<std::string, int32_t>& section);
+    void readConfig();
+    void storeRunId();
 };
 
 #endif /* SERVERDATABASE_H_ */

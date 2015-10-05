@@ -14,22 +14,11 @@ Register_PerObjectConfigOption(CFGID_MARIADB_PASSWD,     "mysql-password",     K
 Register_PerObjectConfigOption(CFGID_MARIADB_DB,         "mysql-database",     KIND_NONE, CFG_STRING,   "\"\"",  "Database name");
 Register_PerObjectConfigOption(CFGID_MARIADB_PORT,       "mysql-port",         KIND_NONE, CFG_INT,      "0",     "Port of mysql server");
 
+
 ServerDatabase::ServerDatabase() {
     try {
 
-        // read config from omnetpp.ini
-        std::string cfgobj = "mysql";
-
-        cConfiguration *cfg = ev.getConfig();
-        std::string host = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_HOST, NULL);
-        std::string user = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_USER, NULL);
-        std::string passwd = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_PASSWD, NULL);
-        std::string db = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_DB, NULL);
-        unsigned int port = (unsigned int) cfg->getAsInt(cfgobj.c_str(), CFGID_MARIADB_PORT, 0);
-
-        std::stringstream ss;
-        ss << "tcp://" << host << ":" << port;
-        std::string fullHost = ss.str();
+        readConfig();
 
         /* Create a connection */
         driver = get_driver_instance();
@@ -48,11 +37,7 @@ ServerDatabase::ServerDatabase() {
         prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(vehicle, section, simtime, speed, position) VALUES (?, ?, ?, ?, ?)");
         prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(vehicle, section, speed, position, simtime_tx, simtime_rx, bytes) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
-        int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
-        std::string network = simulation.getNetworkType()->getName();
-        std::time_t date = std::time(nullptr);
-
-        currentRunId= this->insertRun(runNumber, network, date);
+        storeRunId();
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
@@ -72,6 +57,35 @@ ServerDatabase::~ServerDatabase() {
     delete prep_stmt_select_section_id;
     delete prep_stmt_select_run_id;
     delete con;
+}
+
+
+/**
+ * Read config from omnetpp.ini
+ */
+void ServerDatabase::readConfig() {
+    std::string cfgobj = "mysql";
+    cConfiguration *cfg = ev.getConfig();
+
+    std::string host = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_HOST, NULL);
+    user = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_USER, NULL);
+    passwd = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_PASSWD, NULL);
+    db = cfg->getAsString(cfgobj.c_str(), CFGID_MARIADB_DB, NULL);
+    unsigned int port = (unsigned int) (cfg->getAsInt(cfgobj.c_str(), CFGID_MARIADB_PORT, 0));
+
+    std::stringstream ss;
+    ss << "tcp://" << host << ":" << port;
+    fullHost = ss.str();
+}
+
+/**
+ * Store run information in database and 'currentRunId' member.
+ */
+void ServerDatabase::storeRunId() {
+    int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
+    std::string network = simulation.getNetworkType()->getName();
+    std::time_t date = std::time(nullptr);
+    currentRunId = this->insertRun(runNumber, network, date);
 }
 
 int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t date) {
@@ -106,6 +120,7 @@ int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t d
 
     return runId;
 }
+
 
 void ServerDatabase::insertVehicle(std::string id, std::string type, double length) {
     try {
@@ -200,8 +215,7 @@ void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtime_rx) {
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__
-                << std::endl;
+        std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
         std::cout << "# ERR: " << e.what();
         std::cout << " (MySQL error code: " << e.getErrorCode();
         std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
