@@ -48,6 +48,7 @@ class TraCICommandInterface
 				std::string getRoadId();
 				std::string getCurrentRoadOnRoute();
 				std::string getLaneId();
+				Coord getPosition();
 				double getLanePosition();
 				std::list<std::string> getPlannedRoadIds();
 				std::string getRouteId();

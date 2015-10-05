@@ -126,6 +126,10 @@ std::string TraCICommandInterface::Vehicle::getTypeId() {
 	return traci->genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_TYPE, RESPONSE_GET_VEHICLE_VARIABLE);
 }
 
+Coord TraCICommandInterface::Vehicle::getPosition() {
+    return traci->genericGetCoord(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_POSITION, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
 double TraCICommandInterface::Vehicle::getLanePosition() {
 	return traci->genericGetDouble(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_LANEPOSITION, RESPONSE_GET_VEHICLE_VARIABLE);
 }
