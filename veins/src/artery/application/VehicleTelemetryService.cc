@@ -77,34 +77,34 @@ void VehicleTelemetryService::trigger()
 
 	    lastMessageSent = simTime();
 
-	        // simulation info
-	        simtime_t time = simTime();
+        // simulation info
+        simtime_t time = simTime();
 
-	        // vehicle info
-	        std::string sumoId = getFacilities().getMobility().getExternalId();
-	        std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
-	        int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
-	        double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
-	        Coord pos = getFacilities().getMobility().getVehicleCommandInterface()->getPosition();
-	        double speed = getFacilities().getMobility().getSpeed();
-	        std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
-	        double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();
+        // vehicle info
+        std::string sumoId = getFacilities().getMobility().getExternalId();
+        std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
+        int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
+        double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
+        Coord pos = getFacilities().getMobility().getVehicleCommandInterface()->getPosition();
+        double speed = getFacilities().getMobility().getSpeed();
+        std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
+        double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();
 
-	        LTEReport *report = new LTEReport();
-	        report->setDst("server");
-	        report->setSrc(sumoId.c_str());
-	        report->setRoadId(roadId.c_str());
-	        report->setLaneIndex(laneIndex);
-	        report->setXPosition(pos.x);
-	        report->setYPosition(pos.y);
-	        report->setLanePosition(lanePosition);
-	        report->setSpeed(speed);
-	        report->setVehicleType(vehicleType.c_str());
-	        report->setVehicleLength(vehicleLength);
-	        report->setByteLength(42); //TODO set actual byte length
-	        report->setSendingTime(time);
+        LTEReport *report = new LTEReport();
+        report->setDst("server");
+        report->setSrc(sumoId.c_str());
+        report->setRoadId(roadId.c_str());
+        report->setLaneIndex(laneIndex);
+        report->setXPosition(pos.x);
+        report->setYPosition(pos.y);
+        report->setLanePosition(lanePosition);
+        report->setSpeed(speed);
+        report->setVehicleType(vehicleType.c_str());
+        report->setVehicleLength(vehicleLength);
+        report->setByteLength(42); //TODO set actual byte length
+        report->setSendingTime(time);
 
-	        request(req, report, true);
+        request(req, report, true);
 	}
 
 }

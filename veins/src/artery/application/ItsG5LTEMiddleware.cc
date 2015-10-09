@@ -61,15 +61,14 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
     if (lteReport != nullptr) {
 
         // implement connection to LTE-module
-           IPv4Address address = IPvXAddressResolver().resolve(lteReport->getDst()).get4();
-           if (address.isUnspecified()) {
-               address = manager->getIPAddressForID(lteReport->getDst());
-           }
-           if (address.isUnspecified()) {
-               opp_error((std::string("Address of ") + lteReport->getDst() + " still unspecified!").c_str());
-               return;
-           }
-
+        IPv4Address address = IPvXAddressResolver().resolve(lteReport->getDst()).get4();
+        if (address.isUnspecified()) {
+            address = manager->getIPAddressForID(lteReport->getDst());
+        }
+        if (address.isUnspecified()) {
+            opp_error((std::string("Address of ") + lteReport->getDst() + " still unspecified!").c_str());
+            return;
+        }
 
         // Update statistics
         ++sentMessagesViaLte;
@@ -91,37 +90,40 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
     payload->layer(OsiLayer::Transport) = btp_header;
 
 
-        std::cout << "Sending with DSRC" << endl;
-        switch (req.gn.transport_type) {
-            case geonet::TransportType::SHB: {
-                geonet::ShbDataRequest request(mGeoMib);
-                request.upper_protocol = geonet::UpperProtocol::BTP_B;
-                request.communication_profile = req.gn.communication_profile;
-                if (req.gn.maximum_lifetime) {
-                    request.maximum_lifetime = req.gn.maximum_lifetime.get();
-                }
-                request.repetition = req.gn.repetition;
-                request.traffic_class = req.gn.traffic_class;
-                mGeoRouter.request(request, std::move(payload));
-            }
-                break;
-            case geonet::TransportType::GBC: {
-                geonet::GbcDataRequest request(mGeoMib);
-                request.destination = boost::get<geonet::Area>(req.gn.destination);
-                request.upper_protocol = geonet::UpperProtocol::BTP_B;
-                request.communication_profile = req.gn.communication_profile;
-                if (req.gn.maximum_lifetime) {
-                    request.maximum_lifetime = req.gn.maximum_lifetime.get();
-                }
-                request.repetition = req.gn.repetition;
-                request.traffic_class = req.gn.traffic_class;
-                mGeoRouter.request(request, std::move(payload));
-            }
-                break;
-            default:
-                opp_error("Unknown or unimplemented transport type");
-                break;
-     }
+    if(debug) {
+        std::cout << "[ItsG5LTEMiddleware] Sending with DSRC" << endl;
+    }
+
+    switch (req.gn.transport_type) {
+    case geonet::TransportType::SHB: {
+        geonet::ShbDataRequest request(mGeoMib);
+        request.upper_protocol = geonet::UpperProtocol::BTP_B;
+        request.communication_profile = req.gn.communication_profile;
+        if (req.gn.maximum_lifetime) {
+            request.maximum_lifetime = req.gn.maximum_lifetime.get();
+        }
+        request.repetition = req.gn.repetition;
+        request.traffic_class = req.gn.traffic_class;
+        mGeoRouter.request(request, std::move(payload));
+    }
+        break;
+    case geonet::TransportType::GBC: {
+        geonet::GbcDataRequest request(mGeoMib);
+        request.destination = boost::get<geonet::Area>(req.gn.destination);
+        request.upper_protocol = geonet::UpperProtocol::BTP_B;
+        request.communication_profile = req.gn.communication_profile;
+        if (req.gn.maximum_lifetime) {
+            request.maximum_lifetime = req.gn.maximum_lifetime.get();
+        }
+        request.repetition = req.gn.repetition;
+        request.traffic_class = req.gn.traffic_class;
+        mGeoRouter.request(request, std::move(payload));
+    }
+        break;
+    default:
+        opp_error("Unknown or unimplemented transport type");
+        break;
+    }
 }
 
 void ItsG5LTEMiddleware::initialize(int stage) {
@@ -147,11 +149,11 @@ void ItsG5LTEMiddleware::initializeMiddleware() {
 }
 
 void ItsG5LTEMiddleware::printStats() {
-    if(!isStatisticsPrinted) {
-            std::cout << "[ItsG5LTEMiddleware] Sent " << sentMessagesViaLte << " messages via LTE" << std::endl;
-            std::cout << "[ItsG5LTEMiddleware] Sent " << sentBytesViaLte << " bytes via LTE." << std::endl;
+    if (!isStatisticsPrinted) {
+        std::cout << "[ItsG5LTEMiddleware] Sent " << sentMessagesViaLte << " messages via LTE" << std::endl;
+        std::cout << "[ItsG5LTEMiddleware] Sent " << sentBytesViaLte << " bytes via LTE." << std::endl;
 
-            isStatisticsPrinted = true;
+        isStatisticsPrinted = true;
     }
 }
 
@@ -161,8 +163,7 @@ void ItsG5LTEMiddleware::finish() {
 
 void ItsG5LTEMiddleware::handleMessage(cMessage *msg) {
     // This clock has to be steady, but no time base required
-    mClock = decltype(mClock) { std::chrono::milliseconds(
-            simTime().inUnit(SIMTIME_MS)) };
+    mClock = decltype(mClock) { std::chrono::milliseconds(simTime().inUnit(SIMTIME_MS)) };
 
     // Message arrival for services expects GeoNet-Packets
 
