@@ -27,15 +27,29 @@ ServerDatabase::ServerDatabase() {
         con->setSchema(db);
 
         prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
-        prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(id, type, length) VALUES (?, ?, ?)");
+        prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length) VALUES (?, ?, ?)");
         prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
         prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
+        prepStmtSelectVehicleId = con->prepareStatement("SELECT id FROM vehicles WHERE node = ?");
         prepStmtSelectRunId = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
 
-        // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
-        // It is best to create the tables with the ENGINE = MYISAM option.
-        prepStmtInsertTraci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position_lane, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        prepStmtInsertReport = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        /* NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
+        It is best to create the tables with the ENGINE = MYISAM option.
+        When a client uses INSERT DELAYED, it gets an okay from the server at once,
+        and the row is queued to be inserted when the table is not in use by any other thread.
+
+        Another major benefit of using INSERT DELAYED is that inserts from many clients are bundled
+        together and written in one block. This is much faster than performing many separate inserts.
+
+        Note that INSERT DELAYED is slower than a normal  INSERT if the table is not otherwise in use.
+        There is also the additional overhead for the server to handle a separate thread for each table
+        for which there are delayed rows. This means that you should use INSERT DELAYED only when you are
+        really sure that you need it.
+
+        cf. https://mariadb.com/kb/en/mariadb/insert-delayed/
+        */
+        prepStmtInsertTraci = con->prepareStatement("INSERT INTO traci(runid, vehicle, section, simtime, speed, position_lane, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        prepStmtInsertReport = con->prepareStatement("INSERT INTO reports(runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         storeRunId();
 
@@ -123,9 +137,9 @@ int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t d
 }
 
 
-void ServerDatabase::insertVehicle(std::string id, std::string type, double length) {
+void ServerDatabase::insertVehicle(std::string node, std::string type, double length) {
     try {
-        prepStmtInsertVehicle->setString(1, id);
+        prepStmtInsertVehicle->setString(1, node);
         prepStmtInsertVehicle->setString(2, type);
         prepStmtInsertVehicle->setDouble(3, length);
 
@@ -176,13 +190,31 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
     return sectionId;
 }
 
-void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY) {
+int32_t ServerDatabase::getVehicleId(const std::string vehicleNodeId) {
+
+    prepStmtSelectVehicleId->setString(1, vehicleNodeId);
+
+    sql::ResultSet* res = prepStmtSelectVehicleId->executeQuery();
+
+    int32_t vehicleId = -1;
+    while (res->next()) {
+        // We expect 1 result
+        vehicleId = res->getInt(1);
+    }
+
+    delete res;
+
+    return vehicleId;
+}
+
+void ServerDatabase::insertTraCI(std::string vehicleNodeId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY) {
     try {
         int32_t sectionId = getSectionId(section);
+        int32_t vehicleId = getVehicleId(vehicleNodeId);
 
         // Schema: (runid, vehicle, section, simtime, speed, position_lane, position_x, position_y)
         prepStmtInsertTraci->setInt(1, currentRunId);
-        prepStmtInsertTraci->setString(2, vehicleId);
+        prepStmtInsertTraci->setInt(2, vehicleId);
         prepStmtInsertTraci->setInt(3, sectionId);
         prepStmtInsertTraci->setInt64(4, simtime);
         prepStmtInsertTraci->setDouble(5, speed);
@@ -205,10 +237,11 @@ void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtimeRX) {
     try {
         std::pair<std::string, int32_t> section(report->getRoadId(), report->getLaneIndex());
         int32_t sectionId = getSectionId(section);
+        int32_t vehicleId = getVehicleId(report->getSrc());
 
         // Schema: (runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y)
         prepStmtInsertReport->setInt(1, currentRunId);
-        prepStmtInsertReport->setString(2, report->getSrc());
+        prepStmtInsertReport->setInt(2, vehicleId);
         prepStmtInsertReport->setInt(3, sectionId);
         prepStmtInsertReport->setDouble(4, report->getSpeed());
         prepStmtInsertReport->setDouble(5, report->getLanePosition());

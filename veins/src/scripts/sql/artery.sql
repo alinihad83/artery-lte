@@ -1,12 +1,13 @@
 #
 # Create tables for ArteryLTE.
 #
+# Note: Using CamelCase in database schemes is a bad idea, as it might lead to incompatibilities between different DBMS. Hence, the naming scheme differs from code style.
 
 DROP TABLE IF EXISTS artery_run;
-DROP TABLE IF EXISTS vehicles;
-DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS traci;
 DROP TABLE IF EXISTS reports;
+DROP TABLE IF EXISTS vehicles;
+DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS meta;
 
 CREATE TABLE artery_run (
@@ -17,7 +18,8 @@ CREATE TABLE artery_run (
 );
 
 CREATE TABLE vehicles ( 
-     id VARCHAR(200) NOT NULL PRIMARY KEY,
+     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+     node VARCHAR(200) NOT NULL UNIQUE,
      type VARCHAR(200),
      length DOUBLE PRECISION NOT NULL
 );
@@ -34,28 +36,44 @@ CREATE TABLE traci (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
      runid INT NOT NULL REFERENCES artery_run (id),
      simtime BIGINT UNSIGNED NOT NULL,
-     vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
+     vehicle INT UNSIGNED NOT NULL, 
      speed DOUBLE PRECISION NOT NULL, 
-     section INT UNSIGNED NOT NULL REFERENCES sections (id), 
+     section INT UNSIGNED NOT NULL, 
      position_lane DOUBLE PRECISION NOT NULL,
      position_x DOUBLE PRECISION NOT NULL,
-     position_y DOUBLE PRECISION NOT NULL
-) ENGINE = MYISAM;
+     position_y DOUBLE PRECISION NOT NULL,
+     CONSTRAINT `fk_traci_vehicle`
+          FOREIGN KEY (vehicle) REFERENCES vehicles (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT,
+     CONSTRAINT `fk_traci_section`
+          FOREIGN KEY (section) REFERENCES sections (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT
+); #ENGINE = MYISAM for INSERT DELAYED
 
 CREATE TABLE reports (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
      runid INT NOT NULL REFERENCES artery_run (id),
-     vehicle INT UNSIGNED NOT NULL REFERENCES vehicles (id), 
-     section INT UNSIGNED NOT NULL REFERENCES sections (id), 
+     vehicle INT UNSIGNED NOT NULL, 
+     section INT UNSIGNED NOT NULL, 
      speed DOUBLE PRECISION NOT NULL, 
      position_lane DOUBLE PRECISION NOT NULL,
      position_x DOUBLE PRECISION NOT NULL,
      position_y DOUBLE PRECISION NOT NULL,
      simtime_tx BIGINT UNSIGNED NOT NULL,
      simtime_rx BIGINT UNSIGNED NOT NULL,
-     bytes BIGINT UNSIGNED
+     bytes BIGINT UNSIGNED,
+     CONSTRAINT `fk_reports_vehicle`
+          FOREIGN KEY (vehicle) REFERENCES vehicles (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT,
+     CONSTRAINT `fk_reports_section`
+          FOREIGN KEY (section) REFERENCES sections (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT
 #     via INT UNSIGNED
-) ENGINE = MYISAM;
+); #ENGINE = MYISAM for INSERT DELAYED
 
 CREATE TABLE meta (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,

@@ -42,6 +42,7 @@ protected:
     sql::PreparedStatement *prepStmtInsertTraci;
     sql::PreparedStatement *prepStmtInsertReport;
     sql::PreparedStatement *prepStmtSelectSectionId;
+    sql::PreparedStatement *prepStmtSelectVehicleId;
     sql::PreparedStatement *prepStmtSelectRunId;
 
 public:
@@ -51,7 +52,7 @@ public:
     virtual int32_t insertRun(int number, std::string network, std::time_t date);
     virtual void insertVehicle(std::string id, std::string type, double length);
     virtual void insertSection(std::pair< std::string, int32_t > section, double length);
-    virtual void insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY);
+    virtual void insertTraCI(std::string vehicleNodeId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY);
     virtual void insertLTEReport(LTEReport *report, uint64_t simtimeRX);
 
 private:
@@ -61,6 +62,7 @@ private:
     std::string db;
     int32_t currentRunId;
     int32_t getSectionId(const std::pair<std::string, int32_t>& section);
+    int32_t getVehicleId(const std::string vehicleNodeId);
     void readConfig();
     void storeRunId();
 };
