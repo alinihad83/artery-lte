@@ -20,8 +20,8 @@ CREATE TABLE artery_run (
 
 CREATE TABLE vehicles ( 
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     node VARCHAR(200) NOT NULL,
-     type VARCHAR(200),
+     node VARCHAR(80) NOT NULL,
+     type VARCHAR(80),
      length DOUBLE PRECISION NOT NULL,
      runid INT UNSIGNED NOT NULL,
      UNIQUE(node,runid),
@@ -33,7 +33,7 @@ CREATE TABLE vehicles (
 
 CREATE TABLE sections ( 
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     road_id VARCHAR(200) NOT NULL,
+     road_id VARCHAR(80) NOT NULL,
      lane_index INT UNSIGNED NOT NULL,
      length DOUBLE PRECISION NOT NULL, 
      runid INT UNSIGNED NOT NULL,
