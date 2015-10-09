@@ -29,8 +29,8 @@ ServerDatabase::ServerDatabase() {
         prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
         prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length, runid) VALUES (?, ?, ?, ?)");
-        prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
-        prepStmtSelectVehicleId = con->prepareStatement("SELECT id FROM vehicles WHERE node = ?");
+        prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ? AND runid = ?");
+        prepStmtSelectVehicleId = con->prepareStatement("SELECT id FROM vehicles WHERE node = ? AND runid = ?");
         prepStmtSelectRunId = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
 
         /* NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
@@ -178,6 +178,7 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
 
     prepStmtSelectSectionId->setString(1, section.first);
     prepStmtSelectSectionId->setInt(2, section.second);
+    prepStmtSelectSectionId->setInt(3, currentRunId);
 
     sql::ResultSet* res = prepStmtSelectSectionId->executeQuery();
 
@@ -195,6 +196,7 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
 int32_t ServerDatabase::getVehicleId(const std::string vehicleNodeId) {
 
     prepStmtSelectVehicleId->setString(1, vehicleNodeId);
+    prepStmtSelectVehicleId->setInt(2, currentRunId);
 
     sql::ResultSet* res = prepStmtSelectVehicleId->executeQuery();
 
