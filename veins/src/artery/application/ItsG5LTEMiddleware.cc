@@ -44,9 +44,12 @@ Define_Module(ItsG5LTEMiddleware);
 
 const simsignalwrap_t cMobilityStateChangedSignal(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
 
+long ItsG5LTEMiddleware::sentMessagesViaLte = 0;
+long ItsG5LTEMiddleware::sentBytesViaLte = 0;
+bool ItsG5LTEMiddleware::isStatisticsPrinted = false;
+
 ItsG5LTEMiddleware::ItsG5LTEMiddleware() {
 }
-
 
 void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<cPacket> payload){
     Enter_Method ("request");
@@ -66,6 +69,11 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
                opp_error((std::string("Address of ") + lteReport->getDst() + " still unspecified!").c_str());
                return;
            }
+
+
+        // Update statistics
+        ++sentMessagesViaLte;
+        sentBytesViaLte += lteReport->getByteLength();
 
         std::cout << "[ITSG5Middleware] Sending LTEReport from " << lteReport->getSrc() << std::endl;
         socket.sendTo(lteReport, address, ltePort);
@@ -121,6 +129,7 @@ void ItsG5LTEMiddleware::initialize(int stage) {
     switch (stage) {
         case 0:
             initializeMiddleware();
+            atexit(ItsG5LTEMiddleware::printStats);
             break;
         default:
             break;
@@ -135,6 +144,15 @@ void ItsG5LTEMiddleware::initializeMiddleware() {
     socket.setOutputGate(gate(toLte));
     ltePort = par("ltePort");
     socket.bind(ltePort);
+}
+
+void ItsG5LTEMiddleware::printStats() {
+    if(!isStatisticsPrinted) {
+            std::cout << "[ItsG5LTEMiddleware] Sent " << sentMessagesViaLte << " messages via LTE" << std::endl;
+            std::cout << "[ItsG5LTEMiddleware] Sent " << sentBytesViaLte << " bytes via LTE." << std::endl;
+
+            isStatisticsPrinted = true;
+    }
 }
 
 void ItsG5LTEMiddleware::finish() {

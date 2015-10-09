@@ -55,7 +55,6 @@ class ItsG5BaseService;
 class ItsG5LTEMiddleware : public ItsG5Middleware
 {
 	public:
-
 		ItsG5LTEMiddleware();
 		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<cPacket>);  // method for LTE transmission
         void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>) override;    // method for ITS G5 transmission
@@ -65,6 +64,7 @@ class ItsG5LTEMiddleware : public ItsG5Middleware
         void initializeMiddleware();
 		void finish() override;
 		void handleMessage(cMessage *msg) override;
+		static void printStats();
 
 	private:
 		Veins::TraCIScenarioManager* manager;
@@ -72,6 +72,9 @@ class ItsG5LTEMiddleware : public ItsG5Middleware
 		int fromLte;
 		int toLte;
 		int ltePort;
+        static long sentMessagesViaLte;
+        static long sentBytesViaLte;
+        static bool isStatisticsPrinted;
 };
 
 #endif
