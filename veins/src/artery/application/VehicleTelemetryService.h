@@ -18,6 +18,12 @@
 
 #include "ItsG5Service.h"
 
+/**
+ * @brief
+ * A vehicle service that sends telemetry data to a backend service.
+ *
+ * @author Julian Timpner
+ */
 class VehicleTelemetryService : public ItsG5Service
 {
     public:

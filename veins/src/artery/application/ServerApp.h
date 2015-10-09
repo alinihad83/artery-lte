@@ -28,13 +28,13 @@ using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
 using Veins::TraCIScenarioManager;
 using Veins::TraCIScenarioManagerAccess;
-/*
+
+/**
  * @brief
- * A simple server that just prints the received messages.
+ * A backend application that processes telemetry information received from vehicles, as well as ground truth data from TraCI.
  *
  * @author Julian Timpner
  */
-
 class ServerApp: public ApplicationBase {
 protected:
     UDPSocket socket;

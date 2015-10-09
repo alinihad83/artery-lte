@@ -26,16 +26,16 @@ ServerDatabase::ServerDatabase() {
         /* Connect to the MySQL test database */
         con->setSchema(db);
 
-        prep_stmt_insert_run = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
-        prep_stmt_insert_vehicle = con->prepareStatement("INSERT INTO vehicles(id, type, length) VALUES (?, ?, ?)");
-        prep_stmt_insert_section = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
-        prep_stmt_select_section_id = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
-        prep_stmt_select_run_id = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
+        prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
+        prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(id, type, length) VALUES (?, ?, ?)");
+        prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
+        prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
+        prepStmtSelectRunId = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
 
         // NOTE: INSERT DELAYED is not supported on all engines, notably InnoDB.
         // It is best to create the tables with the ENGINE = MYISAM option.
-        prep_stmt_insert_traci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position_lane, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        prep_stmt_insert_report = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        prepStmtInsertTraci = con->prepareStatement("INSERT DELAYED INTO traci(runid, vehicle, section, simtime, speed, position_lane, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        prepStmtInsertReport = con->prepareStatement("INSERT DELAYED INTO reports(runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         storeRunId();
 
@@ -49,13 +49,13 @@ ServerDatabase::ServerDatabase() {
 }
 
 ServerDatabase::~ServerDatabase() {
-    delete prep_stmt_insert_run;
-    delete prep_stmt_insert_vehicle;
-    delete prep_stmt_insert_section;
-    delete prep_stmt_insert_traci;
-    delete prep_stmt_insert_report;
-    delete prep_stmt_select_section_id;
-    delete prep_stmt_select_run_id;
+    delete prepStmtInsertRun;
+    delete prepStmtInsertVehicle;
+    delete prepStmtInsertSection;
+    delete prepStmtInsertTraci;
+    delete prepStmtInsertReport;
+    delete prepStmtSelectSectionId;
+    delete prepStmtSelectRunId;
     delete con;
 }
 
@@ -94,17 +94,17 @@ int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t d
     int32_t runId = -1;
 
     try {
-        prep_stmt_insert_run->setInt(1, number);
-        prep_stmt_insert_run->setString(2, network);
-        prep_stmt_insert_run->setInt(3, date);
+        prepStmtInsertRun->setInt(1, number);
+        prepStmtInsertRun->setString(2, network);
+        prepStmtInsertRun->setInt(3, date);
 
-        prep_stmt_insert_run->executeUpdate();
+        prepStmtInsertRun->executeUpdate();
 
-        prep_stmt_select_run_id->setInt(1, number);
-        prep_stmt_select_run_id->setString(2, network);
-        prep_stmt_select_run_id->setInt(3, date);
+        prepStmtSelectRunId->setInt(1, number);
+        prepStmtSelectRunId->setString(2, network);
+        prepStmtSelectRunId->setInt(3, date);
 
-        sql::ResultSet* res = prep_stmt_select_run_id->executeQuery();
+        sql::ResultSet* res = prepStmtSelectRunId->executeQuery();
 
         while (res->next()) {
             // We expect 1 result
@@ -125,11 +125,11 @@ int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t d
 
 void ServerDatabase::insertVehicle(std::string id, std::string type, double length) {
     try {
-        prep_stmt_insert_vehicle->setString(1, id);
-        prep_stmt_insert_vehicle->setString(2, type);
-        prep_stmt_insert_vehicle->setDouble(3, length);
+        prepStmtInsertVehicle->setString(1, id);
+        prepStmtInsertVehicle->setString(2, type);
+        prepStmtInsertVehicle->setDouble(3, length);
 
-        prep_stmt_insert_vehicle->executeUpdate();
+        prepStmtInsertVehicle->executeUpdate();
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
@@ -142,11 +142,11 @@ void ServerDatabase::insertVehicle(std::string id, std::string type, double leng
 
 void ServerDatabase::insertSection(std::pair< std::string, int32_t > section, double length) {
     try {
-        prep_stmt_insert_section->setString(1, section.first);
-        prep_stmt_insert_section->setInt(2, section.second);
-        prep_stmt_insert_section->setDouble(3, length);
+        prepStmtInsertSection->setString(1, section.first);
+        prepStmtInsertSection->setInt(2, section.second);
+        prepStmtInsertSection->setDouble(3, length);
 
-        prep_stmt_insert_section->executeUpdate();
+        prepStmtInsertSection->executeUpdate();
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
@@ -160,10 +160,10 @@ void ServerDatabase::insertSection(std::pair< std::string, int32_t > section, do
 
 int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& section) {
 
-    prep_stmt_select_section_id->setString(1, section.first);
-    prep_stmt_select_section_id->setInt(2, section.second);
+    prepStmtSelectSectionId->setString(1, section.first);
+    prepStmtSelectSectionId->setInt(2, section.second);
 
-    sql::ResultSet* res = prep_stmt_select_section_id->executeQuery();
+    sql::ResultSet* res = prepStmtSelectSectionId->executeQuery();
 
     int32_t sectionId = -1;
     while (res->next()) {
@@ -176,21 +176,21 @@ int32_t ServerDatabase::getSectionId(const std::pair<std::string, int32_t>& sect
     return sectionId;
 }
 
-void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double position_lane, double position_x, double position_y) {
+void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY) {
     try {
         int32_t sectionId = getSectionId(section);
 
-        // (runid, vehicle, section, simtime, speed, position)
-        prep_stmt_insert_traci->setInt(1, currentRunId);
-        prep_stmt_insert_traci->setString(2, vehicleId);
-        prep_stmt_insert_traci->setInt(3, sectionId);
-        prep_stmt_insert_traci->setInt64(4, simtime);
-        prep_stmt_insert_traci->setDouble(5, speed);
-        prep_stmt_insert_traci->setDouble(6, position_lane);
-        prep_stmt_insert_traci->setDouble(7, position_x);
-        prep_stmt_insert_traci->setDouble(8, position_y);
+        // Schema: (runid, vehicle, section, simtime, speed, position_lane, position_x, position_y)
+        prepStmtInsertTraci->setInt(1, currentRunId);
+        prepStmtInsertTraci->setString(2, vehicleId);
+        prepStmtInsertTraci->setInt(3, sectionId);
+        prepStmtInsertTraci->setInt64(4, simtime);
+        prepStmtInsertTraci->setDouble(5, speed);
+        prepStmtInsertTraci->setDouble(6, positionLane);
+        prepStmtInsertTraci->setDouble(7, positionX);
+        prepStmtInsertTraci->setDouble(8, positionY);
 
-        prep_stmt_insert_traci->executeUpdate();
+        prepStmtInsertTraci->executeUpdate();
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;
@@ -201,24 +201,24 @@ void ServerDatabase::insertTraCI(std::string vehicleId, std::pair< std::string, 
     }
 }
 
-void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtime_rx) {
+void ServerDatabase::insertLTEReport(LTEReport *report, uint64_t simtimeRX) {
     try {
         std::pair<std::string, int32_t> section(report->getRoadId(), report->getLaneIndex());
         int32_t sectionId = getSectionId(section);
 
-        // (runid, vehicle, section, speed, position, simtime_tx, simtime_rx, bytes)
-        prep_stmt_insert_report->setInt(1, currentRunId);
-        prep_stmt_insert_report->setString(2, report->getSrc());
-        prep_stmt_insert_report->setInt(3, sectionId);
-        prep_stmt_insert_report->setDouble(4, report->getSpeed());
-        prep_stmt_insert_report->setDouble(5, report->getLanePosition());
-        prep_stmt_insert_report->setInt64(6, report->getSendingTime().raw());
-        prep_stmt_insert_report->setInt64(7, simtime_rx);
-        prep_stmt_insert_report->setInt64(8, report->getByteLength());
-        prep_stmt_insert_report->setDouble(9, report->getXPosition());
-        prep_stmt_insert_report->setDouble(10, report->getYPosition());
+        // Schema: (runid, vehicle, section, speed, position_lane, simtime_tx, simtime_rx, bytes, position_x, position_y)
+        prepStmtInsertReport->setInt(1, currentRunId);
+        prepStmtInsertReport->setString(2, report->getSrc());
+        prepStmtInsertReport->setInt(3, sectionId);
+        prepStmtInsertReport->setDouble(4, report->getSpeed());
+        prepStmtInsertReport->setDouble(5, report->getLanePosition());
+        prepStmtInsertReport->setInt64(6, report->getSendingTime().raw());
+        prepStmtInsertReport->setInt64(7, simtimeRX);
+        prepStmtInsertReport->setInt64(8, report->getByteLength());
+        prepStmtInsertReport->setDouble(9, report->getXPosition());
+        prepStmtInsertReport->setDouble(10, report->getYPosition());
 
-        prep_stmt_insert_report->executeUpdate();
+        prepStmtInsertReport->executeUpdate();
 
     } catch (sql::SQLException &e) {
         std::cout << "# ERR: SQLException in " << __FILE__;

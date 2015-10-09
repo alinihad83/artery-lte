@@ -124,9 +124,9 @@ void ServerApp::storeTraCISnapshot() {
  * Store unique vehicle if not already processed in an earlier iteration
  */
 void ServerApp::storeVehicle(const std::string& vehicleId, Veins::TraCICommandInterface::Vehicle& v) {
-    const bool is_vehicle_processed = insertedVehicles.find(vehicleId) != insertedVehicles.end();
+    const bool isVehicleProcessed = insertedVehicles.find(vehicleId) != insertedVehicles.end();
 
-    if (!is_vehicle_processed) {
+    if (!isVehicleProcessed) {
         double length = traci->vehicletype(v.getTypeId()).getLength();
 
         db->insertVehicle(vehicleId, v.getTypeId(), length);
@@ -147,9 +147,9 @@ void ServerApp::storeSection(const std::string roadId, const int32_t laneIndex) 
  * Store unique lane section if not already processed in an earlier iteration
  */
 void ServerApp::storeSection(const std::pair<std::string, int32_t>& section) {
-    const bool is_lane_processed = insertedSections.find(section) != insertedSections.end();
+    const bool isLaneProcessed = insertedSections.find(section) != insertedSections.end();
 
-    if (!is_lane_processed) {
+    if (!isLaneProcessed) {
         Veins::TraCICommandInterface::Lane l = traci->lane(section.first + '_' + std::to_string(section.second));
         double laneLength = l.getLength();
 
