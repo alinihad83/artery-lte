@@ -49,7 +49,7 @@ public:
     ServerDatabase();
     virtual ~ServerDatabase();
     virtual sql::Connection* getConnection();
-    virtual int32_t insertRun(int number, std::string network, std::time_t date);
+    virtual int32_t insertRun(int number, std::string configName, std::string network, std::time_t date);
     virtual void insertVehicle(std::string id, std::string type, double length);
     virtual void insertSection(std::pair< std::string, int32_t > section, double length);
     virtual void insertTraCI(std::string vehicleNodeId, std::pair< std::string, int32_t > section, uint64_t simtime, double speed, double positionLane, double positionX, double positionY);

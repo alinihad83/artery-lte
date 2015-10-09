@@ -26,7 +26,7 @@ ServerDatabase::ServerDatabase() {
         /* Connect to the MySQL test database */
         con->setSchema(db);
 
-        prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
+        prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, config, network, date) VALUES (?, ?, ?, FROM_UNIXTIME(?))");
         prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ? AND runid = ?");
@@ -97,20 +97,22 @@ void ServerDatabase::readConfig() {
  */
 void ServerDatabase::storeRunId() {
     int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
+    std::string configName = simulation.getActiveEnvir()->getConfigEx()->getActiveConfigName();
     std::string network = simulation.getNetworkType()->getName();
     std::time_t date = std::time(nullptr);
 
-    currentRunId = this->insertRun(runNumber, network, date);
+    currentRunId = this->insertRun(runNumber, configName, network, date);
 }
 
-int32_t ServerDatabase::insertRun(int number, std::string network, std::time_t date) {
+int32_t ServerDatabase::insertRun(int number, std::string configName, std::string network, std::time_t date) {
 
     int32_t runId = -1;
 
     try {
         prepStmtInsertRun->setInt(1, number);
-        prepStmtInsertRun->setString(2, network);
-        prepStmtInsertRun->setInt(3, date);
+        prepStmtInsertRun->setString(2, configName);
+        prepStmtInsertRun->setString(3, network);
+        prepStmtInsertRun->setInt(4, date);
 
         prepStmtInsertRun->executeUpdate();
 
