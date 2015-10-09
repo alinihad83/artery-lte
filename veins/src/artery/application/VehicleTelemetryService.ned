@@ -18,6 +18,6 @@ package artery.application;
 simple VehicleTelemetryService like ItsG5Service
 {
     parameters: 
-        bool debug = default(true); 
+        bool debug = default(false); 
         double lteTransmissionInterval @unit(second) = default(0.1s);
 }

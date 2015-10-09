@@ -75,7 +75,7 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
                     ++receivedMessagesViaLte;
                     receivedBytes += report->getByteLength();
                     if(debug) {
-                        std::cout << "[ServerApp] Received LTEReport from " <<  report->getSrc() << std::endl;
+                        std::cout << "[ServerApp] Received LTEReport from node" <<  report->getSrc() << std::endl;
                     }
                 }
             }

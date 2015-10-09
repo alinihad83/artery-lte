@@ -75,6 +75,7 @@ class ItsG5LTEMiddleware : public ItsG5Middleware
         static long sentMessagesViaLte;
         static long sentBytesViaLte;
         static bool isStatisticsPrinted;
+        bool debug;
 };
 
 #endif

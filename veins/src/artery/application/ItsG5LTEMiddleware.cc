@@ -74,7 +74,9 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
         ++sentMessagesViaLte;
         sentBytesViaLte += lteReport->getByteLength();
 
-        std::cout << "[ITSG5Middleware] Sending LTEReport from " << lteReport->getSrc() << std::endl;
+        if(debug) {
+            std::cout << "[ITSG5Middleware] Sending LTEReport from node" << lteReport->getSrc() << std::endl;
+        }
         socket.sendTo(lteReport, address, ltePort);
     } else {
         opp_error("Unable to extract LTEReport out of payload");
@@ -131,6 +133,7 @@ void ItsG5LTEMiddleware::initialize(int stage) {
     switch (stage) {
         case 0:
             initializeMiddleware();
+            debug = par("debug").boolValue();
             atexit(ItsG5LTEMiddleware::printStats);
             break;
         default:

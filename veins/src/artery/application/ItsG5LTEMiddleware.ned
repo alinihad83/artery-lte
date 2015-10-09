@@ -23,6 +23,7 @@ simple ItsG5LTEMiddleware like IBaseLTEApplLayer
 	parameters:
 		int headerLength = default(0) @unit(bit);
 		double updateInterval = default(0.1s) @unit(s);
+        bool debug = default(false);
 		string datetime;
 		int ltePort = default(4242);
 		xml services;
