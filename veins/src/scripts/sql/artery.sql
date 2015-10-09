@@ -19,10 +19,11 @@ CREATE TABLE artery_run (
 
 CREATE TABLE vehicles ( 
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     node VARCHAR(200) NOT NULL UNIQUE,
+     node VARCHAR(200) NOT NULL,
      type VARCHAR(200),
      length DOUBLE PRECISION NOT NULL,
      runid INT UNSIGNED NOT NULL,
+     UNIQUE(node,runid),
      CONSTRAINT `fk_vehicles_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
@@ -35,7 +36,7 @@ CREATE TABLE sections (
      lane_index INT UNSIGNED NOT NULL,
      length DOUBLE PRECISION NOT NULL, 
      runid INT UNSIGNED NOT NULL,
-     UNIQUE(road_id,lane_index),
+     UNIQUE(road_id,lane_index,runid),
      CONSTRAINT `fk_sections_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
