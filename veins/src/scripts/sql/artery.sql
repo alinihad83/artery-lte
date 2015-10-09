@@ -3,11 +3,11 @@
 #
 # Note: Using CamelCase in database schemes is a bad idea, as it might lead to incompatibilities between different DBMS. Hence, the naming scheme differs from code style.
 
-DROP TABLE IF EXISTS artery_run;
 DROP TABLE IF EXISTS traci;
 DROP TABLE IF EXISTS reports;
 DROP TABLE IF EXISTS vehicles;
 DROP TABLE IF EXISTS sections;
+DROP TABLE IF EXISTS artery_run;
 DROP TABLE IF EXISTS meta;
 
 CREATE TABLE artery_run (
@@ -21,7 +21,12 @@ CREATE TABLE vehicles (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
      node VARCHAR(200) NOT NULL UNIQUE,
      type VARCHAR(200),
-     length DOUBLE PRECISION NOT NULL
+     length DOUBLE PRECISION NOT NULL,
+     runid INT UNSIGNED NOT NULL,
+     CONSTRAINT `fk_vehicles_run`
+          FOREIGN KEY (runid) REFERENCES artery_run (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT
 );
 
 CREATE TABLE sections ( 
@@ -29,12 +34,17 @@ CREATE TABLE sections (
      road_id VARCHAR(200) NOT NULL,
      lane_index INT UNSIGNED NOT NULL,
      length DOUBLE PRECISION NOT NULL, 
-     UNIQUE(road_id,lane_index)
+     runid INT UNSIGNED NOT NULL,
+     UNIQUE(road_id,lane_index),
+     CONSTRAINT `fk_sections_run`
+          FOREIGN KEY (runid) REFERENCES artery_run (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT
 );
 
 CREATE TABLE traci (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     runid INT NOT NULL REFERENCES artery_run (id),
+     runid INT UNSIGNED NOT NULL,
      simtime BIGINT UNSIGNED NOT NULL,
      vehicle INT UNSIGNED NOT NULL, 
      speed DOUBLE PRECISION NOT NULL, 
@@ -49,12 +59,16 @@ CREATE TABLE traci (
      CONSTRAINT `fk_traci_section`
           FOREIGN KEY (section) REFERENCES sections (id)
           ON DELETE CASCADE
+          ON UPDATE RESTRICT,
+     CONSTRAINT `fk_traci_run`
+          FOREIGN KEY (runid) REFERENCES artery_run (id)
+          ON DELETE CASCADE
           ON UPDATE RESTRICT
 ); #ENGINE = MYISAM for INSERT DELAYED
 
 CREATE TABLE reports (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-     runid INT NOT NULL REFERENCES artery_run (id),
+     runid INT UNSIGNED NOT NULL,
      vehicle INT UNSIGNED NOT NULL, 
      section INT UNSIGNED NOT NULL, 
      speed DOUBLE PRECISION NOT NULL, 
@@ -70,6 +84,10 @@ CREATE TABLE reports (
           ON UPDATE RESTRICT,
      CONSTRAINT `fk_reports_section`
           FOREIGN KEY (section) REFERENCES sections (id)
+          ON DELETE CASCADE
+          ON UPDATE RESTRICT,
+     CONSTRAINT `fk_reports_run`
+          FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
           ON UPDATE RESTRICT
 #     via INT UNSIGNED

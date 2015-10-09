@@ -27,8 +27,8 @@ ServerDatabase::ServerDatabase() {
         con->setSchema(db);
 
         prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, network, date) VALUES (?, ?, FROM_UNIXTIME(?))");
-        prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length) VALUES (?, ?, ?)");
-        prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length) VALUES (?, ?, ?)");
+        prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length, runid) VALUES (?, ?, ?, ?)");
+        prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ?");
         prepStmtSelectVehicleId = con->prepareStatement("SELECT id FROM vehicles WHERE node = ?");
         prepStmtSelectRunId = con->prepareStatement("SELECT id FROM artery_run WHERE run_number = ? AND network = ? AND date = FROM_UNIXTIME(?)");
@@ -142,6 +142,7 @@ void ServerDatabase::insertVehicle(std::string node, std::string type, double le
         prepStmtInsertVehicle->setString(1, node);
         prepStmtInsertVehicle->setString(2, type);
         prepStmtInsertVehicle->setDouble(3, length);
+        prepStmtInsertVehicle->setInt(4, currentRunId);
 
         prepStmtInsertVehicle->executeUpdate();
 
@@ -159,6 +160,7 @@ void ServerDatabase::insertSection(std::pair< std::string, int32_t > section, do
         prepStmtInsertSection->setString(1, section.first);
         prepStmtInsertSection->setInt(2, section.second);
         prepStmtInsertSection->setDouble(3, length);
+        prepStmtInsertSection->setInt(4, currentRunId);
 
         prepStmtInsertSection->executeUpdate();
 
