@@ -1,0 +1,10 @@
+<launch>
+  <basedir path="examples/bs-ring" />
+  <copy file="ringSect5.net.xml"/>
+  <copy file="ringSect5.DFvtypes.xml"/>
+  <copy file="ringSect5_049.cal.xml"/>
+  <copy file="dua_dump_049.add.xml"/>
+  <copy file="dump_049_1200.xml"/>
+  <copy file="iteration_049.sumocfg" type="config"/>
+  <!-- copy file="gui-settings.xml"/ -->
+</launch>

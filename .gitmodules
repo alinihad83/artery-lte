@@ -1,0 +1,3 @@
+[submodule "veins/examples/bs-ring"]
+	path = veins/examples/bs-ring
+	url = git@gitlab.ibr.cs.tu-bs.de:cm-projects/2015-artery-lte-example-bs-ring.git
