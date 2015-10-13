@@ -116,7 +116,7 @@ if options.mysql:
     config.add_section('mysql')
     config.set('mysql', 'inc_dir', '/usr/include/mysql')
     config.add_section('omnetpp')
-    omnetpp_home = os.environ.get('OMNETPP_HOME', 'None')    
+    omnetpp_home = os.environ.get('OMNETPP_HOME', 'None')
     # Raise error if OMNETPP_HOME not set
     if omnetpp_home == 'None':
         error("OMNETPP_HOME not set!")
