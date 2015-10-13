@@ -132,8 +132,6 @@ if options.mysql:
     omnetpp_includes += ['-I', config.get('omnetpp', 'plat_dir')]
     makemake_flags += mysql_includes + mysql_link + omnetpp_includes
 
-#print makemake_flags
-
 f = open(os.path.join('out', 'config.py'), 'w')
 f.write('run_libs = %s\n' % repr(run_libs))
 f.write('run_neds = %s\n' % repr(run_neds))
