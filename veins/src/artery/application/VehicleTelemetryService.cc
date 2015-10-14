@@ -92,17 +92,37 @@ void VehicleTelemetryService::trigger()
 
         LTEReport *report = new LTEReport();
         report->setDst("server");
+        report->addByteLength(sizeof(char)*6);
+
         report->setSrc(sumoId.c_str());
+        report->addByteLength(sumoId.size());
+
         report->setRoadId(roadId.c_str());
+        report->addByteLength(roadId.size());
+
         report->setLaneIndex(laneIndex);
+        report->addByteLength(sizeof(int32_t));
+
         report->setXPosition(pos.x);
+        report->addByteLength(sizeof(double));
+
         report->setYPosition(pos.y);
+        report->addByteLength(sizeof(double));
+
         report->setLanePosition(lanePosition);
+        report->addByteLength(sizeof(double));
+
         report->setSpeed(speed);
+        report->addByteLength(sizeof(double));
+
         report->setVehicleType(vehicleType.c_str());
+        report->addByteLength(vehicleType.size());
+
         report->setVehicleLength(vehicleLength);
-        report->setByteLength(42); //TODO set actual byte length
+        report->addByteLength(sizeof(double));
+
         report->setSendingTime(time);
+        report->addByteLength(sizeof(long));
 
         request(req, report, true);
 	}
