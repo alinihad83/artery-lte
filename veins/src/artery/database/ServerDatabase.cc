@@ -20,10 +20,9 @@ ServerDatabase::ServerDatabase() {
 
         readConfig();
 
-        /* Create a connection */
+        // Connect to MariaDB
         driver = get_driver_instance();
         con = driver->connect(fullHost, user, passwd);
-        /* Connect to the MySQL test database */
         con->setSchema(db);
 
         prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, config, network, date) VALUES (?, ?, ?, FROM_UNIXTIME(?))");
