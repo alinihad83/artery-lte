@@ -53,6 +53,9 @@ void VehicleTelemetryService::initialize()
 	// Initialize point in time when last message was supposedly sent
 	//   to a random point in time in the transmission interval:
 	lastMessageSent = ev.getRNG( 0 )->doubleRand() * lteTransmissionInterval;
+	if( debug ) {
+	    std::cout << "[" << this->getFullPath() << "]: Beginning sending at " << lastMessageSent << " + " << lteTransmissionInterval << std::endl;
+	}
 	subscribe(scSignalCamReceived);
 }
 
