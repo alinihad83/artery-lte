@@ -50,9 +50,11 @@ void VehicleTelemetryService::initialize()
 	    std::cout << "Init "<< this->getFullPath() << std::endl;
 	}
 	lteTransmissionInterval = par("lteTransmissionInterval");
+	lteTransmissionMaxDistance = par( "lteTransmissionMaxDistance" );
 	// Initialize point in time when last message was supposedly sent
 	//   to a random point in time in the transmission interval:
 	lastMessageSent = ev.getRNG( 0 )->doubleRand() * lteTransmissionInterval;
+	lastMessagePosition = getFacilities().getMobility().getVehicleCommandInterface()->getPosition();
 	if( debug ) {
 	    std::cout << "[" << this->getFullPath() << "]: Beginning sending at " << lastMessageSent << " + " << lteTransmissionInterval << std::endl;
 	}
@@ -72,7 +74,13 @@ void VehicleTelemetryService::trigger()
 {
 	Enter_Method("trigger");
 
-	if (simTime() - lastMessageSent > lteTransmissionInterval) {
+	Coord pos = getFacilities().getMobility().getVehicleCommandInterface()->getPosition();
+
+	if (simTime() - lastMessageSent > lteTransmissionInterval
+	        // FIXME: getDistance() sometimes returns 1.79769e+308 which seems to be value for 'undefined'?
+	        || getFacilities().getMobility().getCommandInterface()->getDistance( lastMessagePosition, pos, true ) > lteTransmissionMaxDistance
+	        )
+	{
 
 	    btp::DataRequestB req;
 	    req.destination_port = host_cast<VehicleTelemetryService::port_type>(getPortNumber());
@@ -81,6 +89,7 @@ void VehicleTelemetryService::trigger()
 	    req.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
 	    lastMessageSent = simTime();
+	    lastMessagePosition = pos;
 
         // simulation info
         simtime_t time = simTime();
@@ -90,7 +99,7 @@ void VehicleTelemetryService::trigger()
         std::string roadId = getFacilities().getMobility().getVehicleCommandInterface()->getRoadId();
         int32_t laneIndex = getFacilities().getMobility().getVehicleCommandInterface()->getLaneIndex();
         double lanePosition = getFacilities().getMobility().getVehicleCommandInterface()->getLanePosition();
-        Coord pos = getFacilities().getMobility().getVehicleCommandInterface()->getPosition();
+        // pos from above
         double speed = getFacilities().getMobility().getSpeed();
         std::string vehicleType = getFacilities().getMobility().getVehicleCommandInterface()->getTypeId();
         double vehicleLength = getFacilities().getMobility().getCommandInterface()->vehicletype(vehicleType).getLength();

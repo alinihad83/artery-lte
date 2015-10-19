@@ -20,4 +20,5 @@ simple VehicleTelemetryService like ItsG5Service
     parameters: 
         bool debug = default(false); 
         double lteTransmissionInterval @unit(second) = default(0.1s);
+        double lteTransmissionMaxDistance @unit(meter) = default(50m);
 }

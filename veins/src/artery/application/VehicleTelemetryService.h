@@ -42,7 +42,9 @@ class VehicleTelemetryService : public ItsG5Service
     private:
         bool debug;
         simtime_t lastMessageSent;
+        Coord lastMessagePosition;
         simtime_t lteTransmissionInterval;
+        double lteTransmissionMaxDistance;
 };
 
 #endif /* VEHICLETELEMETRYSERVICE_H_ */
