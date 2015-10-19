@@ -88,6 +88,12 @@ void VehicleTelemetryService::trigger()
 	    req.gn.traffic_class.tc_id(static_cast<unsigned>(dcc::Profile::DP3));
 	    req.gn.communication_profile = geonet::CommunicationProfile::ITS_G5;
 
+	    if( debug ) {
+	        std::cout << "[" << this->getFullPath() << "@" << simTime() << "] Last message sent at time " << lastMessageSent
+	                  << ", distance " << getFacilities().getMobility().getCommandInterface()->getDistance( lastMessagePosition, pos, true )
+	                  << std::endl;
+	    }
+
 	    lastMessageSent = simTime();
 	    lastMessagePosition = pos;
 
