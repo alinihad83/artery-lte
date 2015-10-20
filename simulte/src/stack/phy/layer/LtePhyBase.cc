@@ -56,8 +56,8 @@ void LtePhyBase::initialize(int stage)
         averageCqiDlvect_ = registerSignal("averageCqiDlvect");
         averageCqiUlvect_ = registerSignal("averageCqiUlvect");
 
-        if (!hasListeners(averageCqiDl_))
-            error("no phy listeners");
+        //if (!hasListeners(averageCqiDl_))
+        //    error("no phy listeners");
 
         tSample_ = new TaggedSample();
         tSample_->module_ = check_and_cast<cComponent*>(this);
