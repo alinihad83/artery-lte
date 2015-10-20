@@ -151,6 +151,6 @@ void VehicleTelemetryService::trigger()
 void VehicleTelemetryService::receiveSignal(cComponent* source, simsignal_t signal, bool valid)
 {
 	if (signal == scSignalCamReceived && valid) {
-		EV << "Vehicle " << getFacilities().getMobility().getExternalId() << " received a CAM in sibling serivce\n";
+		EV << "Vehicle " << getFacilities().getMobility().getExternalId() << " received a CAM in sibling service\n";
 	}
 }
