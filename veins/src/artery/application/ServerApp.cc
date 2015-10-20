@@ -65,7 +65,7 @@ void ServerApp::handleMessageWhenUp(cMessage *msg) {
                     storeVehicle(report->getSrc(), v);
 
                     // Make sure lane section is in database
-                    storeSection(v.getRoadId(), v.getLaneIndex());
+                    storeSection(report->getRoadId(), report->getLaneIndex());
 
                     // Store LTE report
                     uint64_t simtime_rx = simTime().raw();
