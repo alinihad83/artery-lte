@@ -79,8 +79,7 @@ void VehicleTelemetryService::trigger()
 	if (simTime() - lastMessageSent > lteTransmissionInterval
 	        // FIXME: getDistance() sometimes returns 1.79769e+308 which seems to be value for 'undefined'?
 	        || getFacilities().getMobility().getCommandInterface()->getDistance( lastMessagePosition, pos, true ) > lteTransmissionMaxDistance
-	        )
-	{
+	        ) {
 
 	    btp::DataRequestB req;
 	    req.destination_port = host_cast<VehicleTelemetryService::port_type>(getPortNumber());
