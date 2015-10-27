@@ -56,9 +56,10 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
 
     cPacket *tmp = payload.release();
     LTEReport *lteReport = dynamic_cast<LTEReport* >(tmp);
-    this->take(lteReport);
 
     if (lteReport != nullptr) {
+        // Take (omnet++) ownership of this message:
+        this->take(lteReport);
 
         // implement connection to LTE-module
         IPv4Address address = IPvXAddressResolver().resolve(lteReport->getDst()).get4();
