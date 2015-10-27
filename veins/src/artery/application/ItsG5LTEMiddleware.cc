@@ -75,7 +75,7 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
         sentBytesViaLte += lteReport->getByteLength();
 
         if(debug) {
-            std::cout << "[ITSG5Middleware] Sending LTEReport from node" << lteReport->getSrc() << std::endl;
+            std::cout << "[ITSG5LTEMiddleware] Sending LTEReport from node" << lteReport->getSrc() << std::endl;
         }
         socket.sendTo(lteReport, address, ltePort);
     } else {
