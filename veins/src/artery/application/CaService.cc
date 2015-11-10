@@ -186,8 +186,14 @@ vanetza::asn1::Cam createCooperativeAwarenessMessage(const VehicleDataProvider& 
 	bvc.speed.speedConfidence = SpeedConfidence_withinOneCentimeterPerSec * 3;
 	bvc.driveDirection = vdp.speed().value() >= 0.0 ?
 			DriveDirection_forward : DriveDirection_backward;
+
+	// Check acceleration value and set to default according to ETSI standard, if necessary.
 	bvc.longitudinalAcceleration.longitudinalAccelerationValue =
 			(vdp.acceleration() / vanetza::units::si::meter_per_second_squared).value() * LongitudinalAccelerationValue_pointOneMeterPerSecSquaredForward;
+	if(bvc.longitudinalAcceleration.longitudinalAccelerationValue >= 160 || bvc.longitudinalAcceleration.longitudinalAccelerationValue <= -160) {
+	    bvc.longitudinalAcceleration.longitudinalAccelerationValue = 161;
+	}
+
 	bvc.longitudinalAcceleration.longitudinalAccelerationConfidence =
 			AccelerationConfidence_unavailable;
 	bvc.curvature.curvatureValue = (vdp.curvature() / vanetza::units::reciprocal_metre) *
