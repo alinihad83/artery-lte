@@ -137,17 +137,19 @@ LteSchedulerEnbUl::rtxschedule()
 
         HarqRxBuffers::iterator it= harqRxBuffers_->begin() , et=harqRxBuffers_->end();
 
-        for(; it != et; ++it)
+        for(; it != et; )
         {
             // get current nodeId
             MacNodeId nodeId = it->first;
 
             if(nodeId == 0){	// HACK
+                ++it;
                 harqRxBuffers_->erase(nodeId);
                 continue;
             }
             OmnetId id = getBinder()->getOmnetId(nodeId);
             if(id == 0){
+                ++it;
                 harqRxBuffers_->erase(nodeId);
                 continue;
             }
@@ -179,6 +181,7 @@ LteSchedulerEnbUl::rtxschedule()
                 }
             }
             EV << NOW << "LteSchedulerEnbUl::rtxschedule user " << nodeId << " allocated bytes : " << allocatedBytes << endl;
+            ++it;
         }
 
         int availableBlocks = allocator_->computeTotalRbs();
