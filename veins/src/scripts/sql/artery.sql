@@ -8,6 +8,8 @@ CREATE TABLE artery_run (
      config VARCHAR(100) NOT NULL,
      run_number INT UNSIGNED NOT NULL,
      network VARCHAR(80) NOT NULL,
+     penetration_rate_oem VARCHAR(20),
+     penetration_rate_non_oem VARCHAR(20),
      date TIMESTAMP NOT NULL
 );
 

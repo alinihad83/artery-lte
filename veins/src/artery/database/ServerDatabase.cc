@@ -25,7 +25,7 @@ ServerDatabase::ServerDatabase() {
         con = driver->connect(fullHost, user, passwd);
         con->setSchema(db);
 
-        prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, config, network, date) VALUES (?, ?, ?, FROM_UNIXTIME(?))");
+        prepStmtInsertRun = con->prepareStatement("INSERT INTO artery_run(run_number, config, network, date, penetration_rate_oem, penetration_rate_non_oem) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?, ?)");
         prepStmtInsertVehicle = con->prepareStatement("INSERT INTO vehicles(node, type, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtInsertSection = con->prepareStatement("INSERT INTO sections(road_id, lane_index, length, runid) VALUES (?, ?, ?, ?)");
         prepStmtSelectSectionId = con->prepareStatement("SELECT id FROM sections WHERE road_id = ? AND lane_index = ? AND runid = ?");
@@ -98,12 +98,16 @@ void ServerDatabase::storeRunId() {
     int runNumber = simulation.getActiveEnvir()->getConfigEx()->getActiveRunNumber();
     std::string configName = simulation.getActiveEnvir()->getConfigEx()->getActiveConfigName();
     std::string network = simulation.getNetworkType()->getName();
+
+    const char* penetrationRateOEM = simulation.getActiveEnvir()->getConfigEx()->getVariable("penetrationRateOEM");
+    const char* penetrationRateNonOEM = simulation.getActiveEnvir()->getConfigEx()->getVariable("penetrationRateNonOEM");
+
     std::time_t date = std::time(nullptr);
 
-    currentRunId = this->insertRun(runNumber, configName, network, date);
+    currentRunId = this->insertRun(runNumber, configName, network, date, penetrationRateOEM, penetrationRateNonOEM);
 }
 
-int32_t ServerDatabase::insertRun(int number, std::string configName, std::string network, std::time_t date) {
+int32_t ServerDatabase::insertRun(int number, std::string configName, std::string network, std::time_t date, const char* penetrationRateOEM, const char* penetrationRateNonOEM) {
 
     int32_t runId = -1;
 
@@ -112,6 +116,8 @@ int32_t ServerDatabase::insertRun(int number, std::string configName, std::strin
         prepStmtInsertRun->setString(2, configName);
         prepStmtInsertRun->setString(3, network);
         prepStmtInsertRun->setInt(4, date);
+        prepStmtInsertRun->setString(5, penetrationRateOEM);
+        prepStmtInsertRun->setString(6, penetrationRateNonOEM);
 
         prepStmtInsertRun->executeUpdate();
 
