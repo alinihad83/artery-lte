@@ -75,6 +75,9 @@ $ git submodule update --init
 ```
 
 #### Vanetza
+The following packages are required.  
+  `asn1c`
+
 In the vanetza subdir, follow these instructions: 
 ```bash
 $ mkdir build
