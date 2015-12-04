@@ -24,7 +24,7 @@ cd ${BASEDIR}
 
 for r in ${RUNS}; do
 	cd ${EXAMPLE}
-	tmux new-session -d -s ${gitBranch}-${CONFIG}-run-${r} "./run -u Cmdenv -c ${CONFIG} -r ${r}" && echo "Started tmux session for run ${r} of config ${CONFIG}."
+	tmux new-session -d -s ${gitBranch}-${CONFIG}-run-${r} "./run -u Cmdenv -c ${CONFIG} -r ${r} 2>&1 | tee -a ${gitBranch}-${CONFIG}-run-${r}.log" && echo "Started tmux session for run ${r} of config ${CONFIG}."
 	cd ${BASEDIR}
 done
 
