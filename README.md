@@ -76,7 +76,9 @@ $ git submodule update --init
 
 #### Vanetza
 The following packages are required.  
-  `asn1c`
+  `asn1c cmake`
+  
+Make sure to use cmake 3.x.
 
 In the vanetza subdir, follow these instructions: 
 ```bash
