@@ -3,13 +3,6 @@
 #
 # Note: Using CamelCase in database schemes is a bad idea, as it might lead to incompatibilities between different DBMS. Hence, the naming scheme differs from code style.
 
-DROP TABLE IF EXISTS traci;
-DROP TABLE IF EXISTS reports;
-DROP TABLE IF EXISTS vehicles;
-DROP TABLE IF EXISTS sections;
-DROP TABLE IF EXISTS artery_run;
-DROP TABLE IF EXISTS meta;
-
 CREATE TABLE artery_run (
      id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
      config VARCHAR(100) NOT NULL,
