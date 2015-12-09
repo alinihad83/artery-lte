@@ -64,6 +64,21 @@ MariaDB> CREATE DATABASE artery;
 MariaDB> GRANT ALL ON artery.* TO omnetpp@localhost IDENTIFIED BY 'omnetpp';
 MariaDB> flush privileges;
 ```
+4. Tune InnoDB performance in /etc/mysql/my.cnf:
+```
+innodb_flush_log_at_trx_commit = 0
+innodb_flush_method = O_DIRECT
+innodb_buffer_pool_size = 2G
+innodb_buffer_pool_instances = 2
+innodb_log_file_size = 512M
+```
+This should improve write performance according to the following resources:
+ - https://www.percona.com/blog/2014/01/28/10-mysql-settings-to-tune-after-installation/
+ - https://mariadb.com/kb/en/mariadb/xtradbinnodb-server-system-variables/#innodb_flush_log_at_trx_commit
+ - https://www.percona.com/blog/2014/05/23/improve-innodb-performance-write-bound-loads/
+ - http://www.innovation-brigade.com/index.php?module=Content&type=user&func=display&tid=1&pid=2
+ - https://www.percona.com/blog/2007/11/01/innodb-performance-optimization-basics/
+ - http://ajaydivakaran.com/mysql-innodb-are-inserts-slowing-down/
 
 ### Build instructions
 
