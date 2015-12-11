@@ -50,19 +50,21 @@ void LteMaxCi::prepareSchedule()
 //    }
     // ==========================
 
-    for ( ActiveSet::iterator it1 = activeConnectionTempSet_.begin ();it1 != activeConnectionTempSet_.end (); ++it1 )
+    for ( ActiveSet::iterator it1 = activeConnectionTempSet_.begin ();it1 != activeConnectionTempSet_.end (); )
     {
         // Current connection.
         cid = *it1;
 
         MacNodeId nodeId = MacCidToNodeId(cid);
         if(nodeId == 0){    // HACK
+            ++it1;
             activeConnectionSet_.erase(cid);
             activeConnectionTempSet_.erase(cid);
             continue;
         }
         OmnetId id = getBinder()->getOmnetId(nodeId);
         if(id == 0){	// HACK?
+            ++it1;
         	activeConnectionSet_.erase(cid);
         	activeConnectionTempSet_.erase(cid);
         	continue;
@@ -78,11 +80,15 @@ void LteMaxCi::prepareSchedule()
             if (info.readCqiVector()[i]==0)
             cqiNull=true;
         }
-        if (cqiNull)
-        continue;
+        if (cqiNull) {
+            ++it1;
+            continue;
+        }
         //no more free cw
-        if (eNbScheduler_->allocatedCws(nodeId)==codeword)
-        continue;
+        if (eNbScheduler_->allocatedCws(nodeId)==codeword) {
+            ++it1;
+            continue;
+        }
 
         std::set<Remote>::iterator antennaIt = info.readAntennaSet().begin(), antennaEt=info.readAntennaSet().end();
 
@@ -110,6 +116,8 @@ void LteMaxCi::prepareSchedule()
         score.push (desc);
 
         EV << NOW << " LteMaxCI::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
+
+        ++it1;
     }
 
     // Schedule the connections in score order.
