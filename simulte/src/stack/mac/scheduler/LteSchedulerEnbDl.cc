@@ -265,14 +265,16 @@ LteSchedulerEnbDl::rtxschedule()
     HarqTxBuffers::iterator et = harqQueues->end();
 
     // examination of HARQ process in rtx status, adding them to scheduling list
-    for(; it != et; ++it)
+    for(; it != et; )
     {
         // For each UE
         MacNodeId nodeId = it->first;
 
         OmnetId id = getBinder()->getOmnetId(nodeId);
         if(id == 0){    // HACK
-            harqQueues->erase(it);
+	    HarqTxBuffers::iterator itToErase = it;
+	    ++it;
+            harqQueues->erase(itToErase);
             unsigned int availableBlocks = allocator_->computeTotalRbs();
             return (availableBlocks == 0);  // correct?
         }
@@ -327,6 +329,7 @@ LteSchedulerEnbDl::rtxschedule()
                 }
             }
         }
+	++it;
     }
 
     unsigned int availableBlocks = allocator_->computeTotalRbs();
