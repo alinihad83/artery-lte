@@ -2,70 +2,70 @@ ALTER TABLE artery_run
 ADD COLUMN `penetration_rate_oem` VARCHAR(20) NULL AFTER `date`,
 ADD COLUMN `penetration_rate_non_oem` VARCHAR(20) NULL AFTER `penetration_rate_oem`;
 
-### Config: Stage1BS
+### Config: LTEOnlyBS
 UPDATE artery_run 
 SET penetration_rate_oem = '0.054'
-WHERE config = 'Stage1BS' AND run_number = 0;
+WHERE config = 'LTEOnlyBS' AND run_number = 0;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.082'
-WHERE config = 'Stage1BS' AND run_number = 1;
+WHERE config = 'LTEOnlyBS' AND run_number = 1;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.109'
-WHERE config = 'Stage1BS' AND run_number = 2;
+WHERE config = 'LTEOnlyBS' AND run_number = 2;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.136'
-WHERE config = 'Stage1BS' AND run_number = 3;
+WHERE config = 'LTEOnlyBS' AND run_number = 3;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.163'
-WHERE config = 'Stage1BS' AND run_number = 4;
+WHERE config = 'LTEOnlyBS' AND run_number = 4;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.190'
-WHERE config = 'Stage1BS' AND run_number = 5;
+WHERE config = 'LTEOnlyBS' AND run_number = 5;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.218'
-WHERE config = 'Stage1BS' AND run_number = 6;
+WHERE config = 'LTEOnlyBS' AND run_number = 6;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.245'
-WHERE config = 'Stage1BS' AND run_number = 7;
+WHERE config = 'LTEOnlyBS' AND run_number = 7;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.272'
-WHERE config = 'Stage1BS' AND run_number = 8;
+WHERE config = 'LTEOnlyBS' AND run_number = 8;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.299'
-WHERE config = 'Stage1BS' AND run_number = 9;
+WHERE config = 'LTEOnlyBS' AND run_number = 9;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.326'
-WHERE config = 'Stage1BS' AND run_number = 10;
+WHERE config = 'LTEOnlyBS' AND run_number = 10;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.353'
-WHERE config = 'Stage1BS' AND run_number = 11;
+WHERE config = 'LTEOnlyBS' AND run_number = 11;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.381'
-WHERE config = 'Stage1BS' AND run_number = 12;
+WHERE config = 'LTEOnlyBS' AND run_number = 12;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.5'
-WHERE config = 'Stage1BS' AND run_number = 13;
+WHERE config = 'LTEOnlyBS' AND run_number = 13;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '0.75'
-WHERE config = 'Stage1BS' AND run_number = 14;
+WHERE config = 'LTEOnlyBS' AND run_number = 14;
 
 UPDATE artery_run 
 SET penetration_rate_oem = '1'
-WHERE config = 'Stage1BS' AND run_number = 15;
+WHERE config = 'LTEOnlyBS' AND run_number = 15;
 
 
 ### Config: Stage2BS
