@@ -23,7 +23,7 @@ CREATE TABLE vehicles (
      CONSTRAINT `fk_vehicles_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT
+          ON UPDATE CASCADE
 );
 
 CREATE TABLE sections ( 
@@ -36,7 +36,7 @@ CREATE TABLE sections (
      CONSTRAINT `fk_sections_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT
+          ON UPDATE CASCADE
 );
 
 CREATE TABLE traci (
@@ -52,15 +52,15 @@ CREATE TABLE traci (
      CONSTRAINT `fk_traci_vehicle`
           FOREIGN KEY (vehicle) REFERENCES vehicles (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT,
+          ON UPDATE CASCADE,
      CONSTRAINT `fk_traci_section`
           FOREIGN KEY (section) REFERENCES sections (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT,
+          ON UPDATE CASCADE,
      CONSTRAINT `fk_traci_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT
+          ON UPDATE CASCADE
 ); #ENGINE = MYISAM for INSERT DELAYED
 
 CREATE TABLE reports (
@@ -78,15 +78,15 @@ CREATE TABLE reports (
      CONSTRAINT `fk_reports_vehicle`
           FOREIGN KEY (vehicle) REFERENCES vehicles (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT,
+          ON UPDATE CASCADE,
      CONSTRAINT `fk_reports_section`
           FOREIGN KEY (section) REFERENCES sections (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT,
+          ON UPDATE CASCADE,
      CONSTRAINT `fk_reports_run`
           FOREIGN KEY (runid) REFERENCES artery_run (id)
           ON DELETE CASCADE
-          ON UPDATE RESTRICT
+          ON UPDATE CASCADE
 #     via INT UNSIGNED
 ); #ENGINE = MYISAM for INSERT DELAYED
 
