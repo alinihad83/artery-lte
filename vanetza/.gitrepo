@@ -1,0 +1,11 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/riebl/vanetza.git
+	branch = master
+	commit = ed400758a6296c4fd729c660f327a551849fc84b
+	parent = 48c12b92c7f405fca92a6fc85b3246d0112e99d5
+	cmdver = 0.3.0
