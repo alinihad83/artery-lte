@@ -9,7 +9,6 @@
 	<service type="artery.application.VehicleTelemetryService">
 		<listener port="4711" />
 		<filters>
-			<!-- name pattern="flow0\.1.*" /-->
 			<penetration rate="1.0" />
 		</filters>
 	</service>
