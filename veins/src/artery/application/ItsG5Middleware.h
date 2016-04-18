@@ -41,9 +41,6 @@
 namespace Veins { class TraCIMobility; }
 class ItsG5BaseService;
 
-LAddress::L2Type convertToL2Type(const vanetza::MacAddress& mac);
-vanetza::MacAddress convertToMacAddress(const LAddress::L2Type& addr);
-
 /**
  * Middleware providing a runtime context for services.
  * It can be plugged in wherever a IBaseApplLayer implementation is required.
@@ -69,17 +66,20 @@ class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface,
 		void handleLowerControl(cMessage *msg) override;
 		void receiveSignal(cComponent*, simsignal_t, cObject*) override;
 
+	private:
 		void update();
+		void updateRouterTimer();
 		void updateGeoRouter();
 		void updateServices();
 		void initializeMiddleware();
 		void initializeServices();
 		bool checkServiceFilterRules(const cXMLElement* filters) const;
-		vanetza::geonet::Timestamp deriveTimestamp(simtime_t) const;
+		void scheduleRouterTimer();
 
 		Veins::TraCIMobility* mMobility;
 		VehicleDataProvider mVehicleDataProvider;
-		vanetza::clock::time_point mClock;
+		vanetza::Clock::time_point mClock;
+		vanetza::Clock::time_point mLastRouterUpdate;
 		vanetza::dcc::StateMachine mDccFsm;
 		vanetza::dcc::Scheduler mDccScheduler;
 		vanetza::dcc::AccessControl mDccControl;
@@ -90,6 +90,7 @@ class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface,
 		unsigned mAdditionalHeaderBits;
 		simtime_t mUpdateInterval;
 		cMessage* mUpdateMessage;
+		cMessage* mUpdateRouterTimer;
 		std::unique_ptr<Facilities> mFacilities;
 		std::map<ItsG5BaseService*, port_type> mServices;
 };
