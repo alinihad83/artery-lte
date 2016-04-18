@@ -47,6 +47,11 @@ public:
         return *m_wrapper;
     }
 
+    wrapper_type& wrapper()
+    {
+        return *m_wrapper;
+    }
+
 private:
     byte_buffer_impl(const std::shared_ptr<wrapper_type>& other) :
         m_wrapper(other)
