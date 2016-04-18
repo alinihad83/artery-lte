@@ -84,7 +84,7 @@ void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::uni
     }
 }
 
-void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::btp::DownPacket> payload){
+void ItsG5LTEMiddleware::request(const vanetza::btp::DataRequestB& req, std::unique_ptr<vanetza::DownPacket> payload){
     Enter_Method("request");
     using namespace vanetza;
     btp::HeaderB btp_header;
