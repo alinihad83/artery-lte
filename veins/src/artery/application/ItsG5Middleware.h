@@ -52,7 +52,7 @@ class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface,
 
 		ItsG5Middleware();
 		void request(const vanetza::access::DataRequest&, std::unique_ptr<vanetza::geonet::DownPacket>) override;
-		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::btp::DownPacket>) override;
+		void request(const vanetza::btp::DataRequestB&, std::unique_ptr<vanetza::DownPacket>) override;
 		Facilities* getFacilities() { return mFacilities.get(); }
 		port_type getPortNumber(const ItsG5BaseService*) const;
 
@@ -66,6 +66,10 @@ class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface,
 		void handleLowerControl(cMessage *msg) override;
 		void receiveSignal(cComponent*, simsignal_t, cObject*) override;
 
+		vanetza::geonet::MIB mGeoMib;
+		vanetza::geonet::Router mGeoRouter;
+		vanetza::Clock::time_point mClock;
+
 	private:
 		void update();
 		void updateRouterTimer();
@@ -78,13 +82,10 @@ class ItsG5Middleware : public BaseApplLayer, public vanetza::access::Interface,
 
 		Veins::TraCIMobility* mMobility;
 		VehicleDataProvider mVehicleDataProvider;
-		vanetza::Clock::time_point mClock;
 		vanetza::Clock::time_point mLastRouterUpdate;
 		vanetza::dcc::StateMachine mDccFsm;
 		vanetza::dcc::Scheduler mDccScheduler;
 		vanetza::dcc::AccessControl mDccControl;
-		vanetza::geonet::MIB mGeoMib;
-		vanetza::geonet::Router mGeoRouter;
 		vanetza::btp::PortDispatcher mBtpPortDispatcher;
 		boost::posix_time::ptime mTimebase;
 		unsigned mAdditionalHeaderBits;
