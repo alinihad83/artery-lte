@@ -10,6 +10,7 @@ CREATE TABLE artery_run (
      network VARCHAR(80) NOT NULL,
      penetration_rate_oem VARCHAR(20),
      penetration_rate_non_oem VARCHAR(20),
+     lte_transmission_interval VARCHAR(20) NOT NULL DEFAULT '3.6s',
      date TIMESTAMP NOT NULL
 );
 
