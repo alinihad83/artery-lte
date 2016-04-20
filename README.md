@@ -1,25 +1,40 @@
-# Artery LTE
+ArteryLTE - An Inter-Vehicle Communication (IVC) simulation framework.
+======================================================================
 
-Artery LTE merges the two projects [Artery](https://github.com/riebl/artery) and [veins-lte](https://github.com/floxyz/veins-lte).
+ArteryLTE is a holistic IVC simulation framework capable of simulating
+different communication technologies, namely the [ETSI
+ITS-G5](https://www.etsi.org/deliver/etsi_es/202600_202699/202663/01.01.00_50/es_202663v010100m.pdf)
+and the cellular LTE protocol stacks. It thus allows for the analysis of
+different communication strategies based on heterogeneous vehicular networks.
+
+It combines [Artery](https://github.com/riebl/artery) and
+[VeinsLTE](https://github.com/floxyz/veins-lte). Artery's middleware is
+extended by the option of choosing either the ITS-G5 or the LTE stack for
+communication. Upon message generation, the Artery services provide information
+to the middleware in order to choose the appropriate communication technology.
+A backend service is implemented as a static network node connected to the base
+stations (eNodeBs) of the LTE network.
+
+## Publication
+
+ArteryLTE has been developed as part of a research project at the [Institute of
+Operating Systems and Computer Networks (IBR)](https://www.ibr.cs.tu-bs.de) at
+the [Technische Universität Braunschweig](https://www.tu-braunschweig.de).  It
+will be released with a corresponding paper describing the detailed
+architecture as well as simulation results.
 
 ## Installation
 
 ### Prerequisites
 
-#### Boost 1.56.0
-At the time of writing, the official Ubuntu packages only contain version 1.54.0, while Artery requires 1.56.0 at least. A shell script [install_boost.sh](https://gitlab.ibr.cs.tu-bs.de/cm-projects/2015-artery-lte/uploads/ae9781d7b95d1b383c453db56aba46fd/install_boost.sh) takes care of the installation process to `/usr/local/boost_1_56_0`.
-
-Afterwards, you might need to set the permissions on that directory:
-```bash
-$ sudo chown -R root:root /usr/local/boost_1_56_0/
-$ sudo chmod -R a+rX /usr/local/boost_1_56_0/
-```
+#### Boost 1.58.0
+At the time of writing, the official Ubuntu packages contain version 1.58.0, the same version as artery-lte requires. So no other action is needed here at this time.
 
 #### GeographicLib
 Installing vanetza requires (amongst others) GeographicLib in version >= 1.37, which is not available as a binary/package for Ubuntu/Debian-based systems at the time of writing (Okt. 2015). To install the GeoLib, follow the cmake(!) instructions on the ​[GeographicLib Website](http://geographiclib.sourceforge.net/html/install.html).
 
 #### SUMO
-1. The following packages are required.  
+1. The following packages are required.
   `libfox-1.6-dev libgdal-dev libxerces-c-dev libproj-dev`
 
 2. Download and extract SUMO 0.22. Versions 0.21.0 through 0.22.0 are known to be working.
@@ -29,8 +44,8 @@ Installing vanetza requires (amongst others) GeographicLib in version >= 1.37, w
 4. `$ make -j5`
 
 #### OMNeT++
-1. The following packages are required.  
-  `build-essential g++ bison gcc flex perl tcl-dev tk-dev zlib1g-dev 
+1. The following packages are required.
+  `build-essential g++ bison gcc flex perl tcl-dev tk-dev zlib1g-dev
 default-jre doxygen graphviz libwebkitgtk-1.0.0 openmpi-bin libopenmpi-dev libcap-dev cmake`
 
 2. Download and extract OMNeT++ 4.6. (Version 4.4.2 is known to be working as well).
@@ -50,11 +65,11 @@ PATH="$OMNETPP_HOME/bin/:$SUMO_HOME/bin/:$PATH"
 
 #### MariaDB
 
-1. Install the following packages:  
-  `mariadb-server mariadb-client libmysqlclient18 libmysqlclient-dev 
+1. Install the following packages:
+  `mariadb-server mariadb-client libmysqlclient18 libmysqlclient-dev
 libmysqlcppconn7 libmysqlcppconn-dev`
 
-2. Secure your MariaDB installation.  
+2. Secure your MariaDB installation.
    `$ sudo mysql_secure_installation`
 
 3. Create a standard db user and the artery database.
@@ -84,22 +99,21 @@ This should improve write performance according to the following resources:
 
 #### Checkout
 ```bash
-$ git clone git@gitlab.ibr.cs.tu-bs.de:cm-projects/2015-artery-lte.git
-$ git checkout artery
-$ git submodule update --init
+$ git clone https://github.com/ibr-cm/artery-lte.git
+$ git checkout artery-lte
 ```
 
 #### Vanetza
-The following packages are required.  
+The following packages are required.
   `asn1c cmake`
-  
+
 Make sure to use cmake 3.x.
 
-In the vanetza subdir, follow these instructions: 
+In the vanetza subdir, follow these instructions:
 ```bash
 $ mkdir build
 $ cd build/
-$ cmake -D Boost_INCLUDE_DIR=/usr/local/boost_1_56_0 -D VANETZA_GEONET_USE_PACKET_VARIANT=1  ..
+$ cmake -D VANETZA_GEONET_USE_PACKET_VARIANT=1  ..
 
 You may have to run cmake multiple times. Make sure that two asn libraries are successfully linked.
 
@@ -114,7 +128,6 @@ Build ArteryLTE from its main directory:
 $ make makefiles
 $ make -j5 [MODE=release]
 ```
-Note: Release mode seems to break the simulation.
 
 
 ## Run the example:
